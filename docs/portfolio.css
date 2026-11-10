@@ -88,6 +88,10 @@ footer { border-top: 1px solid var(--line); padding-bottom: 2rem; overflow-wrap:
 }
 
 .project-video { display: block; width: min(100%, 50rem); aspect-ratio: 16 / 9; border-radius: .55rem; background: #162e32; }
+.interest-photo, .interest-placeholder { display: block; width: 100%; margin-top: .8rem; border-radius: .4rem; }
+.interest-photo { height: auto; }
+.climbing-photo { aspect-ratio: 921 / 1500; object-fit: cover; object-position: center 58%; }
+.interest-placeholder { display: grid; place-items: center; aspect-ratio: 16 / 9; padding: 1rem; border: 1px dashed var(--line); background: var(--paper); color: var(--muted); text-align: center; }
 .project-grid:has(.report-card) { grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr)); }
 .report-card { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); align-items: center; gap: 1rem; }
 .report-preview { display: block; width: 100%; height: auto; max-height: 10rem; object-fit: contain; }
