@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The radiation spectrum of a hot body</title>
+<style>
+*{box-sizing:border-box}body{margin:0;color:#182334;background:white;font:17px/1.5 'Segoe UI',Arial,sans-serif}main{max-width:1280px;margin:auto;padding:28px 42px}h1{margin:6px 0 18px}h2{font-size:21px;margin:12px 0 8px}.layout{display:grid;grid-template-columns:1.12fr 1fr;gap:32px}.layout>section{min-width:0}canvas,svg{display:block;width:100%;height:auto}label{display:block;margin:12px 0}input{width:100%;accent-color:#2477b5}.controls,footer{display:flex;gap:10px;flex-wrap:wrap;align-items:center}button{font:inherit;padding:6px 10px;border:1px solid #ccd3dd;background:#fff;border-radius:4px;cursor:pointer}.muted{font-size:15px;color:#58667a}.readouts{font-variant-numeric:tabular-nums;color:#27577c}math{font-size:22px;max-width:100%;overflow:auto;margin:14px 0}footer{border-top:1px solid #ddd;margin-top:20px;padding-top:14px}a{color:#2477b5}@media(max-width:800px){main{padding:20px}.layout{grid-template-columns:1fr}}
+</style><link rel="stylesheet" href="lesson-theme.css"><script src="course-navigation.js" defer></script></head>
+<body class="course-slide"><nav class="course-bar" aria-label="Course navigation"><div class="course-steps"><a class="course-arrow" data-previous href="modello_debye.html" aria-label="Previous slide">‹</a><label class="course-track"><span data-slide-position>6 / 6</span><input aria-label="Slide within chapter" type="range" min="1" max="6" value="6" ></label><a class="course-arrow" data-next-slide aria-disabled="true" aria-label="Next slide">›</a></div><div class="course-center"><a class="course-contents" href="indice.html">Course contents</a><span class="course-complete">End of course</span></div><span class="course-chapter">07 · Quantum statistics</span></nav><main><div class="muted">CHAPTER 7 · SLIDE 6</div><h1>The radiation spectrum of a hot body</h1>
+<div class="layout"><section>
+<h2>Heating a resistor</h2>
+<svg viewBox="0 0 660 210" role="img" aria-label="Coiled resistor coloured according to its thermal spectrum">
+<defs><filter id="blur" x="-35%" y="-45%" width="170%" height="190%"><feGaussianBlur stdDeviation="12"/></filter></defs>
+<rect width="660" height="210" rx="10" fill="#141a24"/>
+<path d="M49 105H103 M557 105H611" fill="none" stroke="#8190a0" stroke-width="9"/>
+<path id="coilGlow" fill="none" stroke-width="14" filter="url(#blur)"/>
+<path id="coil" fill="none" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="49" cy="105" r="10" fill="#8594a5"/><circle cx="611" cy="105" r="10" fill="#8594a5"/>
+</svg>
+<label>Temperature <strong><output id="temperatureValue"></output> K</strong><input id="temperature" type="range" min="300" max="6500" step="10" value="1250"></label>
+<div class="controls"><button data-temperature="300">300 K</button><button data-temperature="1100">1100 K</button><button data-temperature="2700">2700 K</button><button data-temperature="5800">5800 K</button></div>
+<p class="muted">The resistor illustrates an ideal emitter. The colour uses the CIE visual response, with brightness compressed for screen display. The higher temperatures let you explore the model spectrum.</p>
+<h2>Spectrum as a function of wavelength</h2>
+<canvas id="spectrum" width="660" height="275" role="img" aria-label="Planck spectrum normalized to its peak, with the visible band highlighted"></canvas>
+<p class="readouts" id="stats"></p>
+</section><section>
+<h2>From photons to the Planck spectrum</h2>
+<p>Each radiation mode has energy hν per photon. At equilibrium, photons can be created and absorbed, so their chemical potential is zero. The Bose–Einstein distribution gives</p>
+<math display="block"><mo>⟨</mo><msub><mi>n</mi><mi>ν</mi></msub><mo>⟩</mo><mo>=</mo><mfrac><mn>1</mn><mrow><msup><mi>e</mi><mrow><mi>h</mi><mi>ν</mi><mo>/</mo><mo>(</mo><msub><mi>k</mi><mi>B</mi></msub><mi>T</mi><mo>)</mo></mrow></msup><mo>−</mo><mn>1</mn></mrow></mfrac></math>
+<p>As in the Debye model, count modes in three dimensions. The number per frequency interval grows as ν². Multiply by hν and the mean occupation, then change variables from frequency to wavelength to obtain the spectral radiance.</p>
+<math display="block"><msub><mi>B</mi><mi>λ</mi></msub><mo>(</mo><mi>T</mi><mo>)</mo><mo>=</mo><mfrac><mrow><mn>2</mn><mi>h</mi><msup><mi>c</mi><mn>2</mn></msup></mrow><msup><mi>λ</mi><mn>5</mn></msup></mfrac><mfrac><mn>1</mn><mrow><msup><mi>e</mi><mrow><mi>h</mi><mi>c</mi><mo>/</mo><mo>(</mo><mi>λ</mi><msub><mi>k</mi><mi>B</mi></msub><mi>T</mi><mo>)</mo></mrow></msup><mo>−</mo><mn>1</mn></mrow></mfrac></math>
+<h2>From visible radiation to perceived colour</h2>
+<p>Different wavelengths stimulate the eye differently. To reproduce the colour, integrate the visible spectrum against three functions describing this response and convert the result to RGB. At low temperatures, nearly all emission is infrared. As the temperature rises, red becomes visible first and shorter wavelengths increasingly contribute.</p>
+<p>The plot divides each curve by its peak to show its shape even at low temperatures. The total power per unit area increases as T⁴. The marker shows the peak of B<sub>λ</sub>, which shifts to shorter wavelengths as T increases.</p>
+<p class="muted"><a href="https://ocw.mit.edu/courses/2-57-nano-to-macro-transport-processes-spring-2012/resources/lecture-9-specific-heat-and-plancks-law/">Planck’s law</a> · <a href="https://jcgt.org/published/0002/02/01/">Approximation of the CIE XYZ colour-matching functions</a></p>
+</section></div></main>
+<script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id);
+const h=6.62607015e-34,c=299792458,k=1.380649e-23;
+const stefan=2*Math.PI**5*k**4/(15*h**3*c**2);
+const wien=h*c/(k*4.965114231744276)*1e6;
+const fmt=(x,n=2)=>x.toLocaleString('it-IT',{minimumFractionDigits:n,maximumFractionDigits:n});
+function planck(microns,T){
+ const wavelength=microns*1e-6;
+ return 2*h*c*c/wavelength**5/Math.expm1(h*c/(wavelength*k*T));
+}
+function cie(nm){
+ const g=(center,left,right)=>{
+  const t=(nm-center)*(nm<center?left:right);
+  return Math.exp(-t*t/2);
+ };
+ return [
+  .362*g(442,.0624,.0374)+1.056*g(599.8,.0264,.0323)-.065*g(501.1,.049,.0382),
+  .821*g(568.8,.0213,.0247)+.286*g(530.9,.0613,.0322),
+  1.217*g(437,.0845,.0278)+.681*g(459,.0385,.0725)
+ ];
+}
+const visible=Array.from({length:201},(_,i)=>{const nm=380+2*i;return {um:nm/1000,weights:cie(nm),step:i===0||i===200?1e-9:2e-9};});
+function colorIntegral(T){
+ let X=0,Y=0,Z=0,power=0;
+ for(const {um,weights,step} of visible){
+  const radiance=planck(um,T)*step;
+  X+=radiance*weights[0];Y+=radiance*weights[1];Z+=radiance*weights[2];power+=radiance;
+ }
+ return {X,Y,Z,power};
+}
+const exposure=colorIntegral(1500).Y;
+const srgb=x=>x<=.0031308?12.92*x:1.055*x**(1/2.4)-.055;
+function screenColor({X,Y,Z}){
+ const channels=[
+  3.2406*X-1.5372*Y-.4986*Z,
+  -.9689*X+1.8758*Y+.0415*Z,
+  .0557*X-.2040*Y+1.0570*Z
+ ].map(v=>Math.max(0,v));
+ const max=Math.max(...channels);
+ const light=-Math.expm1(-((Y/exposure)**.26));
+ return channels.map(v=>Math.round(255*srgb(max?v/max*light:0)));
+}
+let path='M103 105';
+for(let i=0;i<=440;i++){
+ const s=i/440,x=103+454*s,y=105+43*Math.sin(2*Math.PI*9*s);
+ path+=' L'+x.toFixed(2)+' '+y.toFixed(2);
+}
+for(const id of ['coil','coilGlow'])$(id).setAttribute('d',path);
+function drawSpectrum(T,peak){
+ const ctx=$('spectrum').getContext('2d'),left=60,right=634,top=28,bottom=222;
+ const low=.25,high=30,X=u=>left+Math.log(u/low)/Math.log(high/low)*(right-left),Y=y=>bottom-y*(bottom-top);
+ ctx.clearRect(0,0,660,275);
+ ctx.fillStyle='#f4e9db';ctx.fillRect(X(.38),top,X(.78)-X(.38),bottom-top);
+ ctx.fillStyle='#182334';ctx.font='14px Segoe UI';ctx.fillText('Visible',X(.38)+8,top+18);
+ ctx.fillText('Infrared',X(1.3),top+18);
+ for(const tick of [0,.25,.5,.75,1]){
+  ctx.fillStyle='#58667a';ctx.fillText(fmt(tick,2),12,Y(tick)+4);
+  ctx.strokeStyle='#dce4ed';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(left,Y(tick));ctx.lineTo(right,Y(tick));ctx.stroke();
+ }
+ for(const u of [.25,.5,1,2,5,10,20,30])ctx.fillText(String(u).replace('.',','),X(u)-8,bottom+20);
+ ctx.fillText('Wavelength λ (μm) · log scale',197,270);
+ ctx.fillText('Bλ / Bλ,max',left,18);
+ const max=planck(peak,T);
+ ctx.strokeStyle='#2477b5';ctx.lineWidth=2.6;ctx.beginPath();
+ for(let i=0;i<=320;i++){
+  const u=low*(high/low)**(i/320),v=planck(u,T)/max;
+  i?ctx.lineTo(X(u),Y(v)):ctx.moveTo(X(u),Y(v));
+ }
+ ctx.stroke();ctx.fillStyle='#c95a35';ctx.beginPath();ctx.arc(X(peak),Y(1),5,0,2*Math.PI);ctx.fill();
+}
+function update(){
+ const T=Number($('temperature').value),peak=wien/T,sample=colorIntegral(T);
+ const rgb=screenColor(sample),base=rgb.map((v,i)=>Math.max(v,[49,56,66][i]));
+ $('coil').setAttribute('stroke','rgb('+base.join(',')+')');
+ $('coilGlow').setAttribute('stroke','rgb('+rgb.join(',')+')');
+ $('coilGlow').setAttribute('opacity',String(.65*Math.max(...rgb)/255));
+ $('temperatureValue').value=fmt(T,0);
+ const fraction=100*Math.PI*sample.power/(stefan*T**4);
+ $('stats').textContent='Peak: '+fmt(peak)+' μm · Potenza nel visibile: '+(fraction<.01?'< 0,01':fmt(fraction))+'% · Potenza totale: '+fmt(stefan*T**4,0)+' W/m²';
+ drawSpectrum(T,peak);
+}
+$('temperature').oninput=update;
+for(const button of document.querySelectorAll('[data-temperature]')){
+ button.onclick=()=>{$('temperature').value=button.dataset.temperature;update();};
+}
+update();
+})();
+</script></body></html>

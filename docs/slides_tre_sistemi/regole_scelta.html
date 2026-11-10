@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rules for sampling configurations</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:white;color:#182334;font-family:Segoe UI,Arial,sans-serif}main{max-width:1320px;margin:0 auto;padding:42px 48px}h1{font-size:36px;line-height:1.15;margin:0 0 12px;font-weight:650}p{font-size:19px;line-height:1.45;margin:0 0 28px;color:#556174}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:19px;line-height:1.45;table-layout:fixed}th,td{text-align:left;vertical-align:top;padding:20px 18px;border-bottom:1px solid #dce2e9}th{font-size:17px;color:#556174;font-weight:600;border-bottom:2px solid #b8c2cf}th:first-child,td:first-child{width:15%;padding-left:0}th:nth-child(2){width:17%}th:nth-child(3){width:43%}th:last-child{width:25%}td strong{font-weight:650}tbody tr:nth-child(2) td{border-bottom:2px solid #b8c2cf}.boltzmann{color:#d24c3a}.binomial{color:#2477b5}.note{font-size:17px;margin:22px 0 0}.formula{font-family:Georgia,serif;color:#182334}footer{border-top:1px solid #dce2e9;margin-top:28px;padding-top:18px;display:flex;gap:28px;font-size:16px}a{color:#2477b5;text-decoration:none}a:hover{text-decoration:underline}@media(max-width:800px){main{padding:24px}h1{font-size:28px}table{min-width:850px;font-size:17px}th,td{padding:15px 12px}}@media print{@page{size:landscape;margin:12mm}main{padding:0;max-width:none}h1{font-size:28px}table{font-size:14px}th,td{padding:12px}p{font-size:16px}.note{font-size:14px}footer{display:none}}
+table{margin-top:36px}th:first-child,td:first-child{width:18%}th:nth-child(2),th:last-child{width:41%}tbody th{font-size:22px;border-bottom:1px solid #dce2e9}th,td{padding:30px 22px}tbody tr:nth-child(2) td{border-bottom:1px solid #dce2e9}@media(max-width:800px){table{min-width:650px}th,td{padding:22px 16px}}</style><link rel="stylesheet" href="lesson-theme.css"><script src="course-navigation.js" defer></script></head>
+<body class="course-slide"><nav class="course-bar" aria-label="Course navigation"><div class="course-steps"><a class="course-arrow" data-previous href="scatole_energia.html" aria-label="Previous slide">‹</a><label class="course-track"><span data-slide-position>4 / 5</span><input aria-label="Slide within chapter" type="range" min="1" max="5" value="4" ></label><a class="course-arrow" data-next-slide href="esempi_reversibilita.html" aria-label="Next slide">›</a></div><a class="course-contents" href="indice.html">Course contents</a><span class="course-chapter">02 · Energy exchange</span></nav><main>
+<h1>Rules for sampling configurations</h1>
+<p>100 particles, 300 quanta. Two distributions and two ways to sample them.</p>
+<div class="table-wrap"><table aria-label="Two-by-two table of sampling rules">
+<thead><tr><th scope="col"></th><th scope="col">Energy transfer</th><th scope="col">Independent configuration</th></tr></thead>
+<tbody>
+<tr><th scope="row" class="boltzmann">Boltzmann*</th><td>Choose a <strong>particle</strong> and a destination at random.<br>Transfer ε if the source is <strong>occupied</strong>.</td><td>Randomly draw an <strong>occupation vector</strong>.<br>All allowed vectors have equal probability.</td></tr>
+<tr><th scope="row" class="binomial">Binomial</th><td>Choose a <strong>packet</strong> and a destination at random.<br>Transfer the packet.</td><td>Assign <strong>each packet independently</strong><br>to one of the 100 particles at random.</td></tr>
+</tbody></table></div>
+<p class="note">* The Boltzmann distribution is an approximation for this finite system.</p>
+
+</main></body></html>

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Surface tension and soap bubbles</title>
+<style>*{box-sizing:border-box}body{margin:0;color:#182334;background:white;font:17px/1.5 'Segoe UI',Arial,sans-serif}main{max-width:1280px;margin:auto;padding:28px 42px}h1{margin:6px 0 18px}h2{font-size:22px;margin:10px 0}.layout{display:grid;grid-template-columns:1fr 1fr;gap:28px 36px}.layout>section{min-width:0}.rule{border-top:1px solid #ddd;margin-top:20px;padding-top:18px}canvas{display:block;width:100%;height:auto}label{display:block;margin:12px 0}input[type=range]{width:100%;accent-color:#2477b5}button{font:inherit;padding:7px 12px;border:1px solid #ccd3dd;background:white;border-radius:4px;cursor:pointer}.controls,footer{display:flex;gap:12px;flex-wrap:wrap;align-items:center}footer{border-top:1px solid #ddd;margin-top:20px;padding-top:14px}.muted{color:#58667a;font-size:15px}math{font-size:22px;max-width:100%;overflow:auto;margin:14px 0}a{color:#2477b5}@media(max-width:800px){main{padding:20px}.layout{grid-template-columns:1fr}}</style><link rel="stylesheet" href="lesson-theme.css"><script src="course-navigation.js" defer></script></head>
+<body class="course-slide"><nav class="course-bar" aria-label="Course navigation"><div class="course-steps"><a class="course-arrow" data-previous href="attrazione_esclusione.html" aria-label="Previous slide">‹</a><label class="course-track"><span data-slide-position>6 / 8</span><input aria-label="Slide within chapter" type="range" min="1" max="8" value="6" ></label><a class="course-arrow" data-next-slide href="fluttuazioni_membrana.html" aria-label="Next slide">›</a></div><a class="course-contents" href="indice.html">Course contents</a><span class="course-chapter">06 · Entropic forces</span></nav><main><div class="muted">CHAPTER 6 · SLIDE 6</div><h1>Surface tension and soap bubbles</h1>
+<div class="layout">
+<section><h2>The cost of creating an interface</h2>
+<p>Surface tension γ is the free-energy cost per unit increase in interfacial area A at fixed temperature. In a lattice gas, a particle at the boundary has fewer occupied neighbours and loses attractive bonds. The interface can also take many shapes, which contribute to entropy.</p>
+<math display="block"><mi>γ</mi><mo>=</mo><mfrac><mrow><mi>∂</mi><mi>ℱ</mi></mrow><mrow><mi>∂</mi><mi>A</mi></mrow></mfrac><mo>,</mo><mspace width="1em"/><mi>ℱ</mi><mo>=</mo><mi>U</mi><mo>−</mo><mi>T</mi><mi>S</mi></math>
+<canvas id="bonds" width="620" height="130" role="img" aria-label="Celle occupate blu, legami tra vicini e legami mancanti lungo il bordo"></canvas>
+<p class="muted">Microscopic picture. Orange marks show missing bonds on the dilute side. For the 2D lattice, the tension is defined per unit length.</p>
+</section>
+<section><h2>Tension falls near the critical point</h2>
+<canvas id="tensionPlot" width="620" height="220" role="img" aria-label="Lattice-gas line tension versus temperature"></canvas>
+<label>Lattice temperature T/T<sub>c</sub> = <output id="latticeValue"></output><input id="latticeTemp" type="range" min="0" max="1" step=".01" value=".65"></label>
+<p id="lineValue"></p>
+<p class="muted">Exact curve for an axis-aligned interface in a square lattice gas at coexistence. With t = k<sub>B</sub>T/ε, the result is λa/ε = ½ + t ln tanh[1/(4t)]. The available interface configurations reduce the free-energy cost and the tension vanishes at T<sub>c</sub>. <a href="https://www.scholarpedia.org/article/Interface_free_energy">Ising interfacial free energy</a></p>
+</section>
+</div>
+<div class="layout rule">
+<section><h2>Two bubbles connected by a valve</h2>
+<canvas id="bubbles" width="620" height="270" role="img" aria-label="Two connected soap bubbles with the flow direction marked"></canvas>
+<div class="controls"><button id="valve" type="button">Open the valve</button><button id="reset" type="button">Reset the bubbles</button></div>
+<label>Initial radius A (cm) <output id="aValue"></output><input id="radiusA" type="range" min=".7" max="4" step=".1" value="1.4"></label>
+<label>Initial radius B (cm) <output id="bValue"></output><input id="radiusB" type="range" min=".7" max="4" step=".1" value="2.3"></label>
+<label>Surface tension γ (mN/m) <output id="gammaValue"></output><input id="gamma" type="range" min="10" max="70" step="1" value="28"></label>
+<p class="muted">The model assumes spherical bubbles, uniform tension and flow proportional to the pressure difference. For small excess pressures relative to the atmosphere, the total gas volume is approximately constant. The calculation stops when one bubble empties.</p>
+</section>
+<section><h2>The smaller bubble has higher pressure</h2>
+<p>A soap bubble has two air–liquid interfaces. For a thin film of radius R, the surface free energy is ℱ<sub>film</sub> = 2γ · 4πR². Work done by the excess pressure balances the cost of expansion.</p>
+<math display="block"><mi>Δ</mi><mi>p</mi><mo>=</mo><mfrac><mrow><mi>d</mi><msub><mi>ℱ</mi><mtext>film</mtext></msub></mrow><mrow><mi>d</mi><mi>V</mi></mrow></mfrac><mo>=</mo><mfrac><mrow><mn>16</mn><mi>π</mi><mi>γ</mi><mi>R</mi></mrow><mrow><mn>4</mn><mi>π</mi><msup><mi>R</mi><mn>2</mn></msup></mrow></mfrac><mo>=</mo><mfrac><mrow><mn>4</mn><mi>γ</mi></mrow><mi>R</mi></mfrac></math>
+<canvas id="pressurePlot" width="620" height="270" role="img" aria-label="Excess pressure versus radius, with a point for each bubble"></canvas>
+<p id="bubbleStatus"></p>
+<p class="muted">The γ slider sets the tension of each bubble surface. The lattice curve illustrates a separate model. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7957579/">Laplace pressure in a soap film</a></p>
+</section>
+</div>
+
+</main><script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id);
+const fmt=(value,digits=1)=>value.toLocaleString('it-IT',{minimumFractionDigits:digits,maximumFractionDigits:digits});
+const blue='#2477b5',orange='#c95a35';
+function drawBonds(){
+ const c=$('bonds').getContext('2d'),size=25,x0=75,y0=14;
+ c.clearRect(0,0,620,130);c.fillStyle='#eff5fa';c.fillRect(x0,y0,17*size,4*size);
+ const occupied=(x,y)=>x<[9,9,8,8][y];
+ for(let y=0;y<4;y++)for(let x=0;x<17;x++){
+  const cx=x0+(x+.5)*size,cy=y0+(y+.5)*size;
+  c.strokeStyle='#dce4ed';c.strokeRect(cx-size/2,cy-size/2,size,size);
+  if(!occupied(x,y))continue;
+  c.strokeStyle=blue;c.lineWidth=2;
+  for(const [dx,dy] of [[1,0],[0,1]]){
+   if(x+dx>=17||y+dy>=4)continue;
+   const linked=occupied(x+dx,y+dy);
+   c.strokeStyle=linked?blue:orange;
+   c.setLineDash(linked?[]:[3,3]);
+   c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+dx*size*(linked?1:.65),cy+dy*size*(linked?1:.65));c.stroke();
+  }
+  c.setLineDash([]);c.fillStyle=blue;c.beginPath();c.arc(cx,cy,5,0,2*Math.PI);c.fill();
+ }
+}
+const tc=1/(2*Math.log(1+Math.sqrt(2)));
+function lineTension(ratio){
+ if(ratio===0)return .5;
+ const t=ratio*tc;
+ return Math.max(0,.5+t*Math.log(Math.tanh(1/(4*t))));
+}
+function axes(canvas,xMax,yMax,xLabel,yLabel,yDigits=0){
+ const c=canvas.getContext('2d'),left=60,right=canvas.width-24,top=27,bottom=canvas.height-42;
+ const X=x=>left+x/xMax*(right-left),Y=y=>bottom-y/yMax*(bottom-top);
+ c.clearRect(0,0,canvas.width,canvas.height);
+ c.font='15px Segoe UI';c.fillStyle='#182334';c.fillText(yLabel,left,18);
+ c.font='13px Segoe UI';
+ for(let i=0;i<=4;i++){
+  const y=yMax*i/4,x=xMax*i/4;
+  c.strokeStyle='#dce4ed';c.lineWidth=1;c.beginPath();c.moveTo(left,Y(y));c.lineTo(right,Y(y));c.stroke();
+  c.fillStyle='#58667a';c.fillText(fmt(y,yDigits),6,Y(y)+4);c.fillText(fmt(x,xMax<=1?2:1),X(x)-8,bottom+18);
+ }
+ c.fillText(xLabel,(left+right)/2-28,canvas.height-4);
+ return {c,X,Y,left,right,top,bottom};
+}
+function curve(graph,fn,begin,end,color){
+ const {c,X,Y,left,right,top,bottom}=graph;
+ c.save();c.beginPath();c.rect(left,top,right-left,bottom-top);c.clip();
+ c.strokeStyle=color;c.lineWidth=2.5;c.beginPath();
+ for(let i=0;i<=120;i++){const x=begin+(end-begin)*i/120;i?c.lineTo(X(x),Y(fn(x))):c.moveTo(X(x),Y(fn(x)));}
+ c.stroke();c.restore();
+}
+function dot(graph,x,y,color){
+ const {c,X,Y}=graph;c.beginPath();c.arc(X(x),Y(y),5,0,2*Math.PI);c.fillStyle=color;c.fill();
+}
+function drawLattice(){
+ const ratio=Number($('latticeTemp').value),value=lineTension(ratio);
+ $('latticeValue').value=fmt(ratio,2);
+ $('lineValue').textContent='Line tension λa/ε = '+fmt(value,3);
+ const graph=axes($('tensionPlot'),1,.5,'T / Tc','λa / ε',2);
+ curve(graph,lineTension,0,1,blue);dot(graph,ratio,value,orange);
+}
+const volume=r=>4*Math.PI*r**3/3,radius=v=>Math.cbrt(3*v/(4*Math.PI));
+let va,vb,open=false,last=null;
+const gamma=()=>Number($('gamma').value);
+const pressure=r=>.4*gamma()/r;
+function syncValve(){$('valve').textContent=open?'Close the valve':'Open the valve';$('valve').disabled=va===0||vb===0;}
+function reset(){
+ va=volume(Number($('radiusA').value));vb=volume(Number($('radiusB').value));
+ open=false;last=null;syncValve();drawBubbles();
+}
+function advance(dt){
+ if(!open||!va||!vb)return;
+ const flow=1.9*(pressure(radius(va))-pressure(radius(vb)));
+ const transferred=Math.max(-vb,Math.min(va,flow*dt));
+ va-=transferred;vb+=transferred;
+ if(!va||!vb){open=false;syncValve();}
+}
+function drawBubbles(){
+ const ra=radius(va),rb=radius(vb),c=$('bubbles').getContext('2d'),x1=155,x2=465,y=128;
+ c.clearRect(0,0,620,270);
+ c.strokeStyle='#8791a1';c.lineWidth=8;c.beginPath();c.moveTo(x1,y);c.lineTo(x2,y);c.stroke();
+ for(const [x,r,color,label] of [[x1,ra,blue,'A'],[x2,rb,orange,'B']]){
+  if(r){
+   const size=21*r,g=c.createRadialGradient(x-size*.28,y-size*.35,0,x,y,size);
+   g.addColorStop(0,'#fff');g.addColorStop(1,color);
+   c.beginPath();c.arc(x,y,size,0,2*Math.PI);c.fillStyle=g;c.fill();c.strokeStyle=color;c.lineWidth=2;c.stroke();
+   c.beginPath();c.arc(x,y,Math.max(0,size-3),0,2*Math.PI);c.strokeStyle='rgba(255,255,255,.75)';c.lineWidth=1;c.stroke();
+  }
+  c.font='16px Segoe UI';c.fillStyle='#182334';c.textAlign='center';
+  c.fillText(label+' · '+fmt(r,2)+' cm',x,243);
+ }
+ c.fillStyle=open?'#2f9675':'#58667a';c.fillRect(302,114,16,28);
+ if(open&&va&&vb&&Math.abs(ra-rb)>1e-8){
+  c.font='bold 31px Segoe UI';c.fillStyle='#2f7962';c.fillText(ra<rb?'→':'←',310,101);
+ }
+ c.textAlign='left';
+ const minR=Math.max(.12,Math.min(...[ra,rb].filter(Boolean))),yMax=Math.ceil(pressure(minR)*1.14/5)*5;
+ const graph=axes($('pressurePlot'),5.3,yMax,'R (cm)','Δp (Pa)',1);
+ curve(graph,pressure,.08,5.3,'#61788c');
+ if(ra)dot(graph,ra,pressure(ra),blue);if(rb)dot(graph,rb,pressure(rb),orange);
+ $('aValue').value=fmt(Number($('radiusA').value));$('bValue').value=fmt(Number($('radiusB').value));$('gammaValue').value=fmt(gamma(),0);
+ $('bubbleStatus').textContent='Bubble A: '+(ra?fmt(pressure(ra))+' Pa':'svuotata')+' · Bolla B: '+(rb?fmt(pressure(rb))+' Pa':'svuotata');
+}
+$('latticeTemp').oninput=drawLattice;
+$('radiusA').oninput=$('radiusB').oninput=reset;
+$('gamma').oninput=drawBubbles;$('reset').onclick=reset;
+$('valve').onclick=()=>{open=!open;last=null;syncValve();drawBubbles();};
+function frame(now){
+ if(open){
+  if(last!==null){const dt=Math.min((now-last)/1000,.05);for(let i=0;i<5;i++)advance(dt/5);}
+  last=now;drawBubbles();
+ }
+ requestAnimationFrame(frame);
+}
+drawBonds();drawLattice();reset();requestAnimationFrame(frame);
+})();
+</script></body></html>

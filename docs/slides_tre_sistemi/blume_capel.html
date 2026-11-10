@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blume–Capel model</title>
+<style>
+*{box-sizing:border-box}body{margin:0;color:#182334;background:white;font:17px/1.5 'Segoe UI',Arial,sans-serif}main{max-width:1240px;margin:auto;padding:28px 42px}h1{font-size:34px;margin:6px 0 18px}h2{font-size:21px;margin:16px 0 6px}.layout{display:grid;grid-template-columns:1fr 1fr;gap:32px}.layout>div{min-width:0}canvas{display:block;width:100%;aspect-ratio:1;image-rendering:pixelated;background:#edf2f6}.muted{color:#58667a;font-size:15px}p{margin:10px 0}.controls,footer,.legend{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:14px 0}button,select{font:inherit;padding:7px;border:1px solid #ccd3dd;background:white;border-radius:4px}button{cursor:pointer}input[type=range]{width:100%;accent-color:#2477b5}math{font-size:22px;margin:14px 0;max-width:100%;overflow:auto}footer{border-top:1px solid #ddd;padding-top:14px;justify-content:space-between}a{color:#2477b5}.legend span{display:inline-flex;align-items:center;gap:5px}.swatch{display:inline-block;width:16px;height:16px;border:1px solid #8a98a9;border-radius:2px}.fractions{display:grid;grid-template-columns:42px 1fr 66px;align-items:center;gap:6px 10px;font-variant-numeric:tabular-nums}.track{height:10px;background:#edf2f6}.bar{height:100%;width:0}.red{background:#d24c3a}.blue{background:#2477b5}.gray{background:#b9c5d1}#stats{font-variant-numeric:tabular-nums}@media(max-width:800px){main{padding:20px}.layout{grid-template-columns:1fr}h1{font-size:28px}}
+#phasePlane{aspect-ratio:2/1;touch-action:none;cursor:crosshair;image-rendering:auto;background:white}.phase-key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:#58667a}.phase-key span::before{content:'';display:inline-block;width:20px;margin-right:6px;vertical-align:middle;border-top:3px solid #2477b5}.phase-key .first::before{border-top:3px dashed #a54936}.phase-key .point::before{width:8px;height:8px;border:0;border-radius:50%;background:#182334}
+</style>
+<link rel="stylesheet" href="lesson-theme.css"><script src="course-navigation.js" defer></script></head>
+<body class="course-slide"><nav class="course-bar" aria-label="Course navigation"><div class="course-steps"><a class="course-arrow" data-previous href="modello_xy.html" aria-label="Previous slide">‹</a><label class="course-track"><span data-slide-position>8 / 10</span><input aria-label="Slide within chapter" type="range" min="1" max="10" value="8" ></label><a class="course-arrow" data-next-slide href="lennard_jones.html" aria-label="Next slide">›</a></div><a class="course-contents" href="indice.html">Course contents</a><span class="course-chapter">05 · Phases and fluids</span></nav><main>
+<div class="muted">CHAPTER 5 · SLIDE 5</div>
+<h1>Blume–Capel model</h1>
+<div class="layout">
+<div>
+ <canvas id="grid" width="128" height="128" aria-label="Reticolo di spin: blu meno uno, grigio zero, rosso più uno"></canvas>
+ <div class="legend"><span><i class="swatch blue"></i> −1</span><span><i class="swatch gray"></i> 0</span><span><i class="swatch red"></i> +1</span></div>
+ <p id="stats"></p>
+ <div class="controls"><button id="play">Play</button><button id="step">1 sweep</button><label>Initial state <select id="initial"><option value="1">All +1</option><option value="0">All 0</option><option value="random">Random</option></select></label><button id="reset">Reset</button></div>
+ <label>Temperature k<sub>B</sub>T/J = <output id="temperatureValue"></output><input id="temperature" type="range" min="0" max="3" step=".001" value=".6"></label>
+ <label>Anisotropy D/J = <output id="anisotropyValue"></output><input id="anisotropy" type="range" min="-1" max="3" step=".001" value="1.8"></label>
+ <div class="controls"><button id="tricritical">Set the tricritical point</button></div>
+
+</div>
+<div>
+ <h2>Temperature and anisotropy</h2>
+ <canvas id="phasePlane" width="640" height="320" aria-label="Interactive phase diagram with temperature on the horizontal axis and anisotropy on the vertical axis. Use the two sliders above for keyboard adjustment."></canvas>
+ <div class="phase-key"><span>Continuous transition</span><span class="first">First-order transition</span><span class="point">Tricritical point</span></div>
+ <p id="phaseStatus"></p>
+ <h2>Fractions of the three states</h2>
+ <div class="fractions"><span>−1</span><div class="track"><div id="minusBar" class="bar blue"></div></div><output id="minusValue"></output><span>0</span><div class="track"><div id="zeroBar" class="bar gray"></div></div><output id="zeroValue"></output><span>+1</span><div class="track"><div id="plusBar" class="bar red"></div></div><output id="plusValue"></output></div>
+ <p>Magnetization m measures the imbalance between +1 and −1. Magnetic density ρ measures the fraction of nonzero sites. Two opposing domains can give m ≈ 0 even when ρ is large.</p>
+ <p class="muted">The boundary interpolates numerical estimates for D ≥ 0 and shows a qualitative continuation for D &lt; 0. The phase labels describe equilibrium on an infinite lattice. <a href="https://pure.coventry.ac.uk/ws/portalfiles/portal/8466565/1612.02138v1.pdf">Transition line data, Table 1</a></p>
+ <p>Each site has three states, −1, 0 and +1. Nonzero spins lower the energy when neighbouring spins have the same sign. Positive D favours state 0.</p>
+ <math display="block"><mi>H</mi><mo>=</mo><mo>−</mo><mi>J</mi><munder><mo>∑</mo><mrow><mo>⟨</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo>⟩</mo></mrow></munder><msub><mi>s</mi><mi>i</mi></msub><msub><mi>s</mi><mi>j</mi></msub><mo>+</mo><mi>D</mi><munder><mo>∑</mo><mi>i</mi></munder><msubsup><mi>s</mi><mi>i</mi><mn>2</mn></msubsup></math>
+ <p>The term sᵢ² equals 1 for ±1 and 0 for state 0. D therefore sets the energy cost of a magnetic site, analogous to an occupation cost in a lattice gas.</p>
+ <h2>Order and the tricritical point</h2>
+ <p>At low temperature, raise D/J from 1.8 to 2.3. Anisotropy becomes strong enough to favour sites in state 0 over aligned domains.</p>
+ <p>On an infinite square lattice at zero field, the continuous transition line meets the first-order line near <strong>D/J = 1,966</strong> and <strong>k<sub>B</sub>T/J = 0,608</strong>. <a href="https://repository.essex.ac.uk/37611/1/Jstat-finalversion.pdf">Monte Carlo study</a></p>
+ <p class="muted">128 × 128 periodic lattice. Metropolis sampling chooses a site and proposes either of the other two states with equal probability. Each sweep includes N proposals. Near the transition, instantaneous results depend on the initial state and relaxation.</p>
+</div>
+</div>
+<footer><span class="muted">5 · 5 / 7</span></footer>
+</main>
+<script>
+'use strict';
+const L=128,N=L*L;
+const spins=new Int8Array(N),counts=new Int32Array(3);
+const neighbors=new Uint32Array(4*N);
+for(let i=0;i<N;i++){
+ const x=i%L,y=Math.floor(i/L);
+ neighbors.set([y*L+(x+L-1)%L,y*L+(x+1)%L,(i+N-L)%N,(i+L)%N],4*i);
+}
+const $=id=>document.getElementById(id),ctx=$('grid').getContext('2d');
+const pixels=ctx.createImageData(L,L);
+const palette=[[36,119,181],[185,197,209],[210,76,58]];
+const format=(n,digits)=>n.toLocaleString('it-IT',{minimumFractionDigits:digits,maximumFractionDigits:digits});
+let playing=false,sweeps=0,last=0;
+const phasePlane=$('phasePlane'),phaseContext=phasePlane.getContext('2d');
+const phaseBounds={left:56,right:615,top:25,bottom:270};
+const tricritical={temperature:.608,anisotropy:1.966};
+// Pairs are [k_B T/J, D/J]. The last segment extrapolates below D=0.
+const firstOrder=[[0,2],[.4,1.99683],[.5,1.987889],[.6,1.968174],[tricritical.temperature,tricritical.anisotropy]];
+const continuous=[firstOrder.at(-1),[.65,1.95273],[.7,1.93296],[.8,1.87879],[.9,1.8028],[1,1.70258],[1.1,1.575],[1.2,1.4167],[1.3,1.2242],[1.398,1],[1.5,.7101],[1.6,.375],[1.693,0],[1.94,-1]];
+const boundary=[...firstOrder,...continuous.slice(1)];
+const phaseX=t=>phaseBounds.left+(phaseBounds.right-phaseBounds.left)*t/3;
+const phaseY=d=>phaseBounds.bottom-(phaseBounds.bottom-phaseBounds.top)*(d+1)/4;
+function drawPhase(temperature,anisotropy){
+ const c=phaseContext,{left,right,top,bottom}=phaseBounds;
+ c.clearRect(0,0,phasePlane.width,phasePlane.height);
+ c.fillStyle='#eaf3fa';
+ c.fillRect(left,top,right-left,bottom-top);
+ c.beginPath();c.moveTo(left,bottom);
+ for(const [t,d] of boundary)c.lineTo(phaseX(t),phaseY(d));
+ c.closePath();c.fillStyle='#b0cee7';c.fill();
+ c.strokeStyle='#8791a1';c.lineWidth=1;c.strokeRect(left,top,right-left,bottom-top);
+ for(const [points,color,dash] of [[firstOrder,'#a54936',[6,4]],[continuous,'#2477b5',[]]]){
+  c.beginPath();points.forEach(([t,d],i)=>i?c.lineTo(phaseX(t),phaseY(d)):c.moveTo(phaseX(t),phaseY(d)));
+  c.strokeStyle=color;c.lineWidth=3;c.setLineDash(dash);c.stroke();
+ }
+ c.setLineDash([]);c.lineWidth=1;
+ c.fillStyle='#182334';c.font='16px Segoe UI';
+ c.fillText('D / J',8,17);c.fillText('kᴮT / J',550,312);
+ for(const t of [0,.5,1,1.5,2,2.5,3])c.fillText(String(t).replace('.',','),phaseX(t)-7,293);
+ for(const d of [-1,0,1,2,3])c.fillText(String(d),22,phaseY(d)+5);
+ c.font='bold 17px Segoe UI';
+ c.fillText('Ferromagnetic',phaseX(.17),phaseY(.2));
+ c.fillText('Paramagnetic',phaseX(1.64),phaseY(1.6));
+ c.beginPath();c.arc(phaseX(tricritical.temperature),phaseY(tricritical.anisotropy),5,0,2*Math.PI);c.fill();
+ c.beginPath();c.arc(phaseX(temperature),phaseY(anisotropy),8,0,2*Math.PI);
+ c.strokeStyle='#fff';c.lineWidth=5;c.stroke();
+ c.strokeStyle='#d24c3a';c.lineWidth=2.5;c.stroke();
+ const upper=boundary.findIndex(([t])=>t>=temperature);
+ let phase='Paramagnetic';
+ if(upper>=0){
+  const [t1,d1]=boundary[upper];
+  const [t0,d0]=boundary[Math.max(0,upper-1)];
+  const limit=t0===t1?d1:d0+(d1-d0)*(temperature-t0)/(t1-t0);
+  phase=Math.abs(anisotropy-limit)<.015?'Vicino alla transizione':anisotropy<limit?'Ferromagnetic':'Paramagnetic';
+ }
+ if(temperature===tricritical.temperature&&anisotropy===tricritical.anisotropy)phase='Punto tricritico';
+ $('phaseStatus').textContent='Predicted equilibrium · '+phase;
+}
+function selectPhase(event){
+ const rect=phasePlane.getBoundingClientRect(),{left,right,top,bottom}=phaseBounds;
+ const x=(event.clientX-rect.left)*phasePlane.width/rect.width;
+ const y=(event.clientY-rect.top)*phasePlane.height/rect.height;
+ const clamp=value=>Math.max(0,Math.min(1,value));
+ $('temperature').value=(3*clamp((x-left)/(right-left))).toFixed(3);
+ $('anisotropy').value=(4*clamp((bottom-y)/(bottom-top))-1).toFixed(3);
+ parameters();
+}
+function setPlaying(value){
+ playing=value;
+ $('play').textContent=playing?'Pause':'Play';
+}
+function parameters(){
+ const temperature=+$('temperature').value,anisotropy=+$('anisotropy').value;
+ $('temperatureValue').value=format(temperature,3);
+ $('anisotropyValue').value=format(anisotropy,3);
+ drawPhase(temperature,anisotropy);
+}
+function reset(){
+ const initial=$('initial').value;
+ counts.fill(0);
+ for(let i=0;i<N;i++){
+  const spin=initial==='random'?Math.floor(Math.random()*3)-1:Number(initial);
+  spins[i]=spin;
+  counts[spin+1]++;
+ }
+ sweeps=0;
+ setPlaying(false);
+ draw();
+}
+function sweep(temperature,anisotropy){
+ for(let step=0;step<N;step++){
+  const i=Math.floor(Math.random()*N),old=spins[i];
+  const proposed=(old+1+1+Math.floor(Math.random()*2))%3-1;
+  const k=4*i;
+  const sum=spins[neighbors[k]]+spins[neighbors[k+1]]+spins[neighbors[k+2]]+spins[neighbors[k+3]];
+  const delta=-(proposed-old)*sum+anisotropy*(proposed*proposed-old*old);
+  if(delta<=0||(temperature>0&&Math.random()<Math.exp(-delta/temperature))){
+   spins[i]=proposed;
+   counts[old+1]--;
+   counts[proposed+1]++;
+  }
+ }
+ sweeps++;
+}
+function draw(){
+ for(let i=0;i<N;i++){
+  const [r,g,b]=palette[spins[i]+1],offset=4*i;
+  pixels.data[offset]=r;pixels.data[offset+1]=g;pixels.data[offset+2]=b;pixels.data[offset+3]=255;
+ }
+ ctx.putImageData(pixels,0,0);
+ ['minus','zero','plus'].forEach((id,i)=>{
+  const fraction=100*counts[i]/N;
+  $(id+'Bar').style.width=fraction+'%';
+  $(id+'Value').value=format(fraction,1)+'%';
+ });
+ const m=(counts[2]-counts[0])/N,rho=(counts[0]+counts[2])/N;
+ $('stats').textContent='Sweep '+sweeps+' · m = '+format(m,3)+' · ρ = '+format(rho,3);
+}
+$('play').onclick=()=>setPlaying(!playing);
+$('step').onclick=()=>{setPlaying(false);sweep(+$('temperature').value,+$('anisotropy').value);draw();};
+$('reset').onclick=reset;
+$('temperature').oninput=parameters;
+$('anisotropy').oninput=parameters;
+phasePlane.onpointerdown=event=>{
+ phasePlane.setPointerCapture(event.pointerId);
+ selectPhase(event);
+};
+phasePlane.onpointermove=event=>{
+ if(phasePlane.hasPointerCapture(event.pointerId))selectPhase(event);
+};
+$('tricritical').onclick=()=>{
+ $('temperature').value=tricritical.temperature;
+ $('anisotropy').value=tricritical.anisotropy;
+ parameters();
+};
+function frame(time){
+ if(playing&&time-last>50){
+  const temperature=+$('temperature').value,anisotropy=+$('anisotropy').value;
+  for(let i=0;i<8;i++)sweep(temperature,anisotropy);
+  draw();
+  last=time;
+ }
+ requestAnimationFrame(frame);
+}
+parameters();reset();requestAnimationFrame(frame);
+</script>
+</body></html>

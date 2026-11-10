@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Alessandro Ciavatta’s curriculum vitae. Research, education, teaching, software and publications.">
+  <title>Curriculum vitae · Alessandro Ciavatta</title>
+  <link rel="stylesheet" href="portfolio.css">
+</head>
+<body>
+  <main class="portfolio">
+    <nav class="site-nav" aria-label="Portfolio">
+      <a class="brand" href="index.html">Alessandro Ciavatta</a>
+      <div><a href="index.html#projects">Projects</a><a href="index.html#previous-works">Documents and previous projects</a></div>
+    </nav>
+    <header class="cv-header">
+      <p class="eyebrow">Curriculum vitae</p>
+      <h1>Alessandro Ciavatta</h1>
+      <p class="intro">Computational physicist working on lattice dynamics, materials simulation and scientific software.</p>
+      <div class="actions"><a href="mailto:ciavatta.alessandro@gmail.com">Email</a><a href="https://github.com/lord-cepo">GitHub</a></div>
+    </header>
+    <section class="section cv-section">
+      <h2>Doctoral research</h2>
+      <h3>IMPMC, Sorbonne Université · 2023–2026</h3>
+      <p><em><a href="https://theses.fr/s383438">Green-Function Approaches to Lattice Vibrations in Disordered Materials</a></em>. Supervisor: Lorenzo Paulatto. Doctoral School 564, Physique Île-de-France.</p>
+      <div class="document-links">
+        <a href="pdfs/phd-thesis.pdf">View thesis</a>
+        <a href="pdfs/phd-defense.pdf">View defense slides</a>
+      </div>
+      <ul>
+        <li>Developed <strong>MPI-parallel software for phonon–defect scattering</strong>. Implemented average T-matrix and dynamical cluster methods, <strong>complex-plane tetrahedron integration</strong> and a <strong>self-consistent solver with Broyden mixing</strong>.</li>
+        <li>Used <strong>BLAS and LAPACK</strong> for numerical linear algebra and <strong>FFTW</strong> for Fourier transforms. Extended <strong>Fourier interpolation</strong> of defect force constants to account for long-range electrostatic corrections and acoustic sum rules.</li>
+        <li>Studied vacancies and boron and phosphorus dopants in silicon, the thermal conductivity of SiGe alloys, and defect-induced Raman shifts and broadening in Te-substituted monolayer WSe₂.</li>
+        <li>Contributed to <strong><a href="https://github.com/anharmonic/d3q">D3Q / thermal2</a></strong>, a scientific software suite linked to Quantum ESPRESSO, and extended it for phonon–defect calculations in a <a href="https://github.com/lord-cepo/D3Q">GitHub fork</a>.</li>
+      </ul>
+    </section>
+    <section class="section cv-section">
+      <h2>Teaching</h2>
+      <h3>Sorbonne Université · Undergraduate physics</h3>
+      <div lang="fr">
+        <p>Enseignements en licence de physique à Sorbonne Université</p>
+        <ul>
+          <li><strong>Travaux dirigés (TD)</strong> de mécanique et de mathématiques</li>
+          <li><strong>Travaux pratiques (TP)</strong> sur les ondes et de programmation en Python</li>
+        </ul>
+      </div>
+      <p>Created an <a href="slides_tre_sistemi/indice.html">interactive statistical mechanics lesson</a> with seven chapters and browser simulations, from collisions and energy exchange to quantum statistics.</p>
+    </section>
+    <section class="section cv-section">
+      <h2>Education</h2>
+      <ul>
+        <li><strong>2023–2026 · Doctoral research in Physics</strong>, Sorbonne Université, IMPMC.</li>
+        <li>
+          <strong>2022–2023 · Master M2, Sciences des Matériaux et Nano-Objets</strong>, Sorbonne Université.
+          <em>Density Functional Perturbation Theory and applications: Raman spectroscopy of Ar impurities in Corundum Al₂O₃</em>. Supervisor: Lorenzo Paulatto.
+          <div class="document-links">
+            <a href="pdfs/master-thesis.pdf">View thesis</a>
+            <a href="pdfs/master-presentation.pdf">View defense slides</a>
+          </div>
+        </li>
+        <li><strong>2021–2023 · Master in Material Physics and Nanoscience</strong>, Università di Bologna.</li>
+        <li>
+          <strong>2018–2021 · BSc in Physics</strong>, Università di Bologna.
+          <em><a href="https://amslaurea.unibo.it/id/eprint/23633/" lang="it">Teoria della superconduttività e soluzione numerica dell’equazione della gap BCS</a></em>.
+          <div class="document-links">
+            <a href="pdfs/bachelor-thesis.pdf">View thesis</a>
+            <a href="pdfs/bachelor-presentation.pdf">View defense slides</a>
+          </div>
+        </li>
+      </ul>
+    </section>
+    <section class="section cv-section">
+      <h2>Conferences and training schools</h2>
+      <ul>
+        <li><strong>2026 · <a href="https://premc.org/nmht2026/">NMHT Conference</a></strong>, Berlin, Germany.</li>
+        <li><strong>20–26 April 2025 · <a href="https://eu-mace.eu/event/4908%3Atraining-school-2025-totemic">TOTEMIC Training School</a></strong>, Cargèse, Corsica, France. <em>Tools for Energy Materials Modelling Acceleration</em>.</li>
+        <li><strong>29 August–2 September 2022 · <a href="https://impmc.sorbonne-universite.fr/fr/evenements/manifestations/ecole-d-ete-pisacms-paris-international-school-on-advanced-computational-materials-science-28-08-4-09-22-paris.html">PISACMS international school</a></strong>.</li>
+      </ul>
+    </section>
+    <section class="section cv-section">
+      <h2>Technical skills</h2>
+      <ul>
+        <li><strong>Scientific computing</strong> · Modern Fortran, Python (NumPy, SciPy, pandas, Matplotlib), MPI, BLAS/LAPACK, FFTW, Linux, Git and Bash. Intermediate C++. Introductory Julia and JavaScript.</li>
+        <li><strong>Numerical methods</strong> · Green functions, Fourier interpolation, complex-plane numerical integration, self-consistent solvers and Broyden mixing.</li>
+        <li><strong>Materials modelling</strong> · DFT and DFPT, harmonic and anharmonic lattice dynamics, phonon–phonon and electron–phonon interactions, defect scattering, Raman simulation and thermal transport.</li>
+        <li><strong>Atomistic tools</strong> · Quantum ESPRESSO and VASP. Familiar with ASE, MACE and machine-learning interatomic potentials.</li>
+        <li><strong>Languages</strong> · Italian (native), English, French, Spanish (A2).</li>
+      </ul>
+    </section>
+    <section class="section cv-section">
+      <h2>Publications and software</h2>
+      <ul>
+        <li>Sen et al., including A. Ciavatta, <em>Competing regimes of carrier and impurity scattering limiting phonon heat conduction in heavily doped silicon</em>, accepted in <em>Physical Review B</em>, October 2026. <a href="https://doi.org/10.1103/bqc1-pd6j">DOI: 10.1103/bqc1-pd6j</a>.</li>
+        <li>Paulatto et al., including A. Ciavatta, <em>Anharmonic – Thermal transport package for Quantum ESPRESSO</em>, software, 2025. <a href="https://hal.science/hal-05109162">HAL record</a>.</li>
+      </ul>
+    </section>
+    <footer><a href="index.html">Back to home</a><span>Alessandro Ciavatta</span></footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,101 @@
+:root {
+  color-scheme: light;
+  --paper: #f6f4ec;
+  --panel: #fffdf7;
+  --ink: #162e32;
+  --muted: #385052;
+  --accent: #12594d;
+  --line: #bccdc4;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 1rem/1.6 system-ui, sans-serif;
+}
+.portfolio { width: min(70rem, calc(100% - 2.5rem)); margin: auto; }
+a { color: #07574b; text-underline-offset: .2em; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.site-nav, footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: .5rem 1.5rem;
+  padding: 1.15rem 0;
+}
+.site-nav { border-bottom: 1px solid var(--line); }
+.site-nav div { display: flex; flex-wrap: wrap; gap: .45rem 1.15rem; }
+.brand { font-weight: 750; text-decoration: none; }
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(12rem, 17rem);
+  gap: clamp(1.5rem, 6vw, 5rem);
+  align-items: center;
+  padding: clamp(2.5rem, 7vw, 5rem) 0;
+}
+h1, h2, h3 { font-family: Georgia, serif; line-height: 1.08; }
+h1 { margin: .2em 0; font-size: clamp(3.25rem, 9vw, 6.5rem); letter-spacing: -.05em; }
+h2 { margin: .25em 0 .6em; font-size: clamp(1.8rem, 4vw, 3rem); letter-spacing: -.025em; }
+h3 { margin: .35em 0; font-size: 1.45rem; }
+p { max-width: 65ch; color: var(--muted); }
+.intro { font-size: clamp(1.1rem, 2vw, 1.35rem); }
+.profile-facts { display: grid; gap: .2rem; margin: 1rem 0 0; font-size: .92rem; }
+.profile-facts div { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: .65rem; }
+.profile-facts dt { font-weight: 700; }
+.profile-facts dd { margin: 0; color: var(--muted); }
+.eyebrow {
+  margin: 0;
+  font-size: .75rem;
+  font-weight: 750;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; margin-top: 1.25rem; }
+.button { display: inline-block; padding: .65rem 1rem; background: var(--accent); color: white; border-radius: .4rem; text-decoration: none; font-weight: 700; }
+.button:hover { background: #0a453c; }
+.portrait {
+  display: grid;
+  place-items: center;
+  margin: 0;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: .55rem;
+  background: #e4ebe0;
+  color: var(--accent);
+  font: 700 clamp(3rem, 8vw, 5rem)/1 Georgia, serif;
+}
+.portrait img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.section { border-top: 1px solid var(--line); padding: 2rem 0; }
+.project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 1rem; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: .55rem; padding: 1.2rem; }
+.card a { font-weight: 700; }
+.cv-header { padding: clamp(2rem, 6vw, 4rem) 0; }
+.cv-header h1 { font-size: clamp(2.75rem, 7vw, 5rem); }
+.cv-section { max-width: 76ch; }
+.cv-section h2 { font-size: clamp(1.7rem, 3vw, 2.25rem); }
+.cv-section ul { padding-left: 1.3rem; }
+.cv-section li + li { margin-top: .45rem; }
+.document-links { display: flex; flex-wrap: wrap; gap: .25rem 1rem; margin: .4rem 0 .75rem; font-size: .9rem; }
+footer { border-top: 1px solid var(--line); padding-bottom: 2rem; overflow-wrap: anywhere; }
+
+@media (max-width: 630px) {
+  .hero { grid-template-columns: 1fr; }
+  .portrait { width: min(48vw, 12rem); grid-row: 1; }
+}
+
+.project-video { display: block; width: min(100%, 50rem); aspect-ratio: 16 / 9; border-radius: .55rem; background: #162e32; }
+.project-grid:has(.report-card) { grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr)); }
+.report-card { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); align-items: center; gap: 1rem; }
+.report-preview { display: block; width: 100%; height: auto; max-height: 10rem; object-fit: contain; }
+.report-details { min-width: 0; }
+.report-details h3 { overflow-wrap: anywhere; }
+.report-details .document-links { margin-bottom: 0; }
+
+@media (max-width: 450px) {
+  .report-card { grid-template-columns: 1fr; }
+  .report-preview { max-height: 12rem; }
+}

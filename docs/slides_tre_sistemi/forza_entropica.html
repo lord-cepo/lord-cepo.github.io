@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The entropic origin of pressure</title>
+<style>
+*{box-sizing:border-box}body{margin:0;color:#182334;background:white;font:17px/1.5 'Segoe UI',Arial,sans-serif}main{max-width:1280px;margin:auto;padding:28px 42px}h1{font-size:34px;margin:6px 0 18px}h2{font-size:21px;margin:16px 0 8px}p{margin:10px 0}.layout{display:grid;grid-template-columns:1fr 1.08fr;gap:34px}.layout>section{min-width:0}canvas{display:block;width:100%;height:auto}.muted{color:#58667a;font-size:15px}label{display:block;margin:16px 0 8px}input{width:100%;accent-color:#2477b5}.readouts{display:flex;gap:8px 22px;flex-wrap:wrap;color:#27577c;font-variant-numeric:tabular-nums}math{font-size:22px;max-width:100%;overflow:auto;margin:14px 0}footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;border-top:1px solid #ddd;margin-top:22px;padding-top:14px}a{color:#2477b5}@media(max-width:800px){main{padding:20px}.layout{grid-template-columns:1fr}h1{font-size:28px}math{font-size:18px}}
+</style>
+<link rel="stylesheet" href="lesson-theme.css"><script src="course-navigation.js" defer></script></head>
+<body class="course-slide"><nav class="course-bar" aria-label="Course navigation"><div class="course-steps"><a class="course-arrow" data-previous aria-disabled="true" aria-label="Previous slide">‹</a><label class="course-track"><span data-slide-position>1 / 8</span><input aria-label="Slide within chapter" type="range" min="1" max="8" value="1" ></label><a class="course-arrow" data-next-slide href="polimero_entropico.html" aria-label="Next slide">›</a></div><a class="course-contents" href="indice.html">Course contents</a><span class="course-chapter">06 · Entropic forces</span></nav><main>
+<div class="muted">CHAPTER 6 · ENTROPIC FORCES</div>
+<h1>The entropic origin of pressure</h1>
+<div class="layout">
+ <section>
+  <h2>A gas in a cylinder with a movable piston</h2>
+  <canvas id="piston" width="640" height="270" role="img" aria-label="Gas in a cylinder. Moving the piston outward increases the space available to the particles."></canvas>
+  <label>Relative length <strong>x/x₀ = <output id="positionValue">1,00</output></strong><input id="position" type="range" min=".5" max="2" step=".01" value="1"></label>
+  <div class="readouts"><span>ΔS/(Nk<sub>B</sub>) = <output id="entropyValue">0,000</output></span><span>P/P₀ = <output id="pressureValue">1,000</output></span></div>
+  <p class="muted">N and T are fixed, and the cross-sectional area A is constant. The dots show one particle configuration. The arrow shows the force the gas exerts on the piston.</p>
+  <canvas id="curves" width="640" height="240" role="img" aria-label="Entropy increases logarithmically with length. Pressure decreases in inverse proportion to length."></canvas>
+  <p>Doubling x gives each particle twice as much space. The number of positional configurations grows by a factor of 2<sup>N</sup>, while the pressure is halved.</p>
+ </section>
+ <section>
+  <h2>More volume, more configurations</h2>
+  <p>The piston is at distance x from the wall, giving a volume V = Ax. In an ideal gas each particle can occupy the entire volume independently of the others. At fixed N and T, the position-dependent part of the statistical weight is proportional to V<sup>N</sup>. Counting configurations relative to the reference volume V₀ = Ax₀ gives</p>
+  <math display="block"><mi>S</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>−</mo><mi>S</mi><mo>(</mo><msub><mi>x</mi><mn>0</mn></msub><mo>)</mo><mo>=</mo><mi>N</mi><msub><mi>k</mi><mi>B</mi></msub><mi>ln</mi><mfrac><mi>x</mi><msub><mi>x</mi><mn>0</mn></msub></mfrac><mo>.</mo></math>
+  <h2>From free energy to force</h2>
+  <p>During a reversible displacement at constant temperature, the gas does work F dx on the piston. Its Helmholtz free energy, ℱ = U − TS, decreases by that amount. For an ideal gas at fixed T, internal energy U is independent of x, so differentiation at fixed T and N leaves the entropic contribution.</p>
+  <math display="block"><mi>F</mi><mo>=</mo><mo>−</mo><msub><mrow><mo>(</mo><mfrac><mrow><mi>∂</mi><mi>ℱ</mi></mrow><mrow><mi>∂</mi><mi>x</mi></mrow></mfrac><mo>)</mo></mrow><mrow><mi>T</mi><mo>,</mo><mi>N</mi></mrow></msub><mo>=</mo><mi>T</mi><msub><mrow><mo>(</mo><mfrac><mrow><mi>∂</mi><mi>S</mi></mrow><mrow><mi>∂</mi><mi>x</mi></mrow></mfrac><mo>)</mo></mrow><mrow><mi>T</mi><mo>,</mo><mi>N</mi></mrow></msub><mo>=</mo><mfrac><mrow><mi>N</mi><msub><mi>k</mi><mi>B</mi></msub><mi>T</mi></mrow><mi>x</mi></mfrac><mo>.</mo></math>
+  <h2>The ideal gas law</h2>
+  <p>Divide the force by the piston area. Using V = Ax gives</p>
+  <math display="block"><mi>P</mi><mo>=</mo><mfrac><mi>F</mi><mi>A</mi></mfrac><mo>=</mo><mfrac><mrow><mi>N</mi><msub><mi>k</mi><mi>B</mi></msub><mi>T</mi></mrow><mi>V</mi></mfrac><mo>,</mo><mspace width="1em"/><menclose notation="box"><mrow><mi>P</mi><mi>V</mi><mo>=</mo><mi>N</mi><msub><mi>k</mi><mi>B</mi></msub><mi>T</mi><mo>=</mo><mi>n</mi><mi>R</mi><mi>T</mi></mrow></menclose></math>
+  <p class="muted">N is the number of particles and n is the number of moles. In general the force can also have an energetic contribution, −(∂U/∂x)<sub>T,N</sub>.</p>
+ </section>
+</div>
+
+</main>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const format=(value,digits)=>value.toLocaleString('it-IT',{minimumFractionDigits:digits,maximumFractionDigits:digits});
+const particles=Array.from({length:24},()=>[Math.random(),Math.random()]);
+function drawPiston(ratio){
+ const c=$('piston').getContext('2d'),left=32,top=38,bottom=205,right=550;
+ const piston=left+ratio*245;
+ c.clearRect(0,0,640,270);
+ c.fillStyle='#e6f2fb';c.fillRect(left,top,piston-left,bottom-top);
+ c.strokeStyle='#566b80';c.lineWidth=3;c.beginPath();
+ c.moveTo(right,top);c.lineTo(left,top);c.lineTo(left,bottom);c.lineTo(right,bottom);c.stroke();
+ c.fillStyle='#2477b5';
+ for(const [x,y] of particles){
+  c.beginPath();c.arc(left+10+x*(piston-left-20),top+10+y*(bottom-top-20),4.5,0,2*Math.PI);c.fill();
+ }
+ c.fillStyle='#465d74';c.fillRect(piston-4,top,8,bottom-top);
+ const tip=piston+6+48/ratio,mid=(top+bottom)/2;
+ c.strokeStyle='#c34c35';c.fillStyle='#c34c35';c.lineWidth=3;
+ c.beginPath();c.moveTo(piston+6,mid);c.lineTo(tip,mid);c.stroke();
+ c.beginPath();c.moveTo(tip,mid);c.lineTo(tip-10,mid-6);c.lineTo(tip-10,mid+6);c.closePath();c.fill();
+ c.font='bold 18px Segoe UI';c.fillText('F',piston+14,mid-14);
+ c.strokeStyle='#8791a1';c.lineWidth=1;c.beginPath();
+ c.moveTo(left,bottom+13);c.lineTo(left,bottom+26);c.moveTo(piston,bottom+13);c.lineTo(piston,bottom+26);
+ c.moveTo(left,bottom+20);c.lineTo(piston,bottom+20);c.stroke();
+ c.font='16px Segoe UI';c.fillStyle='#182334';c.textAlign='center';c.fillText('x',(left+piston)/2,bottom+47);c.textAlign='left';
+}
+function drawCurves(ratio){
+ const c=$('curves').getContext('2d');c.clearRect(0,0,640,240);
+ const series=[{left:50,min:-.7,max:.75,fn:Math.log,name:'ΔS/(Nkᴮ)',color:'#2477b5',ticks:[-.5,0,.5]},
+ {left:365,min:0,max:2.1,fn:x=>1/x,name:'P/P₀',color:'#c34c35',ticks:[.5,1,1.5,2]}];
+ for(const {left,min,max,fn,name,color,ticks} of series){
+  const top=34,bottom=192,w=245;
+  const X=x=>left+(x-.5)*w/1.5,Y=y=>bottom-(y-min)*(bottom-top)/(max-min);
+  c.font='16px Segoe UI';c.fillStyle=color;c.fillText(name,left,21);
+  c.font='13px Segoe UI';c.fillStyle='#58667a';
+  for(const tick of ticks){
+   const y=Y(tick);c.strokeStyle='#dce4ed';c.lineWidth=1;c.beginPath();c.moveTo(left,y);c.lineTo(left+w,y);c.stroke();c.fillText(format(tick,1),left-33,y+4);
+  }
+  for(const x of [.5,1,1.5,2])c.fillText(format(x,1),X(x)-9,bottom+18);
+  c.fillText('x / x₀',left+w/2-14,bottom+40);
+  c.strokeStyle=color;c.lineWidth=2.5;c.beginPath();
+  for(let i=0;i<=120;i++){const x=.5+1.5*i/120;i?c.lineTo(X(x),Y(fn(x))):c.moveTo(X(x),Y(fn(x)));}c.stroke();
+  c.beginPath();c.arc(X(ratio),Y(fn(ratio)),5,0,2*Math.PI);c.fillStyle=color;c.fill();
+ }
+}
+function update(){
+ const ratio=Number($('position').value);
+ $('positionValue').value=format(ratio,2);
+ $('entropyValue').value=format(Math.log(ratio),3);
+ $('pressureValue').value=format(1/ratio,3);
+ drawPiston(ratio);drawCurves(ratio);
+}
+$('position').oninput=update;
+update();
+</script>
+</body></html>

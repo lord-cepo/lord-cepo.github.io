@@ -1,0 +1,14 @@
+{
+  "particelle_per_gas": 200,
+  "tempo_finale": 333.3,
+  "passo_fotogrammi": 0.1,
+  "energia_iniziale": 444.829971392502,
+  "urti": 55896,
+  "errori_massimi_energia_bilancioP_bilancioL": [
+    2.7533531010703882e-14,
+    2.4547329843652444e-13,
+    2.1316282072803006e-12
+  ],
+  "variazione_massima_vy_quadro_singola_particella": 0.0,
+  "nota": "Il vincolo verticale e quello di orientazione non compiono lavoro, ma scambiano quantità di moto verticale e momento angolare."
+}

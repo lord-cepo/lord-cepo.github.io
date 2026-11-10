@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Stability of a soap film without gravity</title>
+<style>*{box-sizing:border-box}body{margin:0;color:#182334;background:white;font:17px/1.5 'Segoe UI',Arial,sans-serif}main{max-width:1280px;margin:auto;padding:28px 42px}h1{margin:6px 0 18px}h2{font-size:21px;margin:12px 0}.layout{display:grid;grid-template-columns:1.1fr 1fr;gap:32px}.layout>section{min-width:0}canvas{display:block;width:100%;height:auto}label{display:block;margin:8px 0}input[type=range]{width:100%;accent-color:#2477b5}button{font:inherit;padding:7px 12px;background:white;border:1px solid #ccd3dd;border-radius:4px;cursor:pointer}.controls,footer{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.parameters{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}.muted{font-size:15px;color:#58667a}math{font-size:21px;max-width:100%;overflow:auto;margin:14px 0}footer{border-top:1px solid #ddd;margin-top:20px;padding-top:14px}a{color:#2477b5}@media(max-width:800px){main{padding:20px}.layout{grid-template-columns:1fr}}@media(max-width:450px){.parameters{grid-template-columns:1fr}}</style><link rel="stylesheet" href="lesson-theme.css"><script src="course-navigation.js" defer></script></head>
+<body class="course-slide"><nav class="course-bar" aria-label="Course navigation"><div class="course-steps"><a class="course-arrow" data-previous href="fluttuazioni_membrana.html" aria-label="Previous slide">‹</a><label class="course-track"><span data-slide-position>8 / 8</span><input aria-label="Slide within chapter" type="range" min="1" max="8" value="8" ></label><a class="course-arrow" data-next-slide aria-disabled="true" aria-label="Next slide">›</a></div><div class="course-center"><a class="course-contents" href="indice.html">Course contents</a><a class="course-next" href="bosoni_fermioni.html" aria-label="Next chapter · Quantum statistics ›">Next chapter ›</a></div><span class="course-chapter">06 · Entropic forces</span></nav><main><div class="muted">CHAPTER 6 · SLIDE 8</div><h1>Stability of a soap film without gravity</h1>
+<div class="layout"><section>
+<h2>Two interfaces with an initial dip</h2>
+<canvas id="film" width="640" height="245" aria-label="Sezione del film. Due interfacce simmetriche delimitano il liquido." role="img"></canvas>
+<div class="controls"><button id="play">Play</button><button id="reset">Restart</button><button id="unstable">Try an unstable film</button></div>
+<div class="parameters">
+<label>Tension K = <output id="capValue"></output><input id="cap" type="range" min=".2" max="2" step=".05" value="1"></label>
+<label>Curvature of W, B = <output id="interactionValue"></output><input id="interaction" type="range" min="-2" max="1" step=".05" value="-.65"></label>
+<label>Surfactant elasticity E = <output id="surfactantValue"></output><input id="surfactant" type="range" min="0" max="4" step=".1" value="2"></label>
+<label>Polymer elasticity G = <output id="polymerValue"></output><input id="polymer" type="range" min="0" max="4" step=".1" value="2"></label>
+<label>Polymer relaxation time τ = <output id="relaxationValue"></output><input id="relaxation" type="range" min=".2" max="8" step=".1" value="3"></label>
+</div>
+<p id="status" role="status"></p>
+<p class="muted">Interface colour shows relative surfactant concentration, with darker areas indicating higher concentrations. Each change starts from the same profile. Heights are exaggerated and time is measured in model units.</p>
+</section><section>
+<h2>Minimum thickness over time</h2>
+<canvas id="history" width="640" height="235" aria-label="Minimum thickness with and without surfactants and polymers" role="img"></canvas>
+<p class="muted">Blue: film with the selected parameters. Dashed orange: the same film with E = G = 0 and the same mean tension K.</p>
+<p>The film is uniform along y and periodic along x. Its thickness is h(x) = 1 + u(x), with interfaces at z = ±h/2. The midplane is fixed. The film starts with a small thickness perturbation and the model conserves the amount of liquid.</p>
+<math display="block"><mi>ℱ</mi><mo>=</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>∫</mo><mo>[</mo><mi>K</mi><msubsup><mi>u</mi><mi>x</mi><mn>2</mn></msubsup><mo>+</mo><mi>B</mi><msup><mi>u</mi><mn>2</mn></msup><mo>+</mo><mi>E</mi><msup><mi>c</mi><mn>2</mn></msup><mo>+</mo><mi>G</mi><msup><mrow><mo>(</mo><mi>u</mi><mo>−</mo><mi>v</mi><mo>)</mo></mrow><mn>2</mn></msup><mo>]</mo><mi>d</mi><mi>x</mi></math>
+<p>Tension K penalizes slopes because they increase the interfacial area. B is the local curvature of the interaction potential between the two surfaces. Negative B can favour thinning. Without additives, mode q grows if Kq² + B &lt; 0.</p>
+<p>Variable c measures the local excess of surfactant on the two surfaces. When E &gt; 0, local tension falls where surfactant accumulates. Marangoni coupling draws liquid towards regions of higher tension. The term G(u − v) represents the transient elastic stress of the polymers. Variable v follows u on the timescale τ, allowing the remaining stress to relax.</p>
+<p class="muted">This reduced isothermal linear model uses an insoluble surfactant and a single viscoelastic relaxation time. The coefficients are illustrative. The comparison stops when either profile exceeds the chosen small-perturbation limit. <a href="https://journals.aps.org/prfluids/abstract/10.1103/PhysRevFluids.1.083903">Gradient dynamics and surfactants</a> · <a href="https://journals.aps.org/prfluids/abstract/10.1103/PhysRevFluids.5.013304">Polymers in soap films</a></p>
+</section></div>
+
+</main><script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id);
+const ids=['cap','interaction','surfactant','polymer','relaxation'];
+const fmt=(x,n=2)=>x.toLocaleString('it-IT',{minimumFractionDigits:n,maximumFractionDigits:n});
+const coupling=.72,diffusion=.18,nx=161,dt=.0025;
+const cosine=Array.from({length:3},(_,i)=>Array.from({length:nx},(_,j)=>Math.cos((i+1)*2*Math.PI*j/(nx-1))));
+let modes,reference,settings,time,playing=false,last=null,carry=0,history,finished=false;
+function profile(state){
+ const h=[],c=[];
+ for(let j=0;j<nx;j++){
+  let thickness=1,concentration=0;
+  state.forEach((mode,i)=>{thickness+=mode.u*cosine[i][j];concentration+=mode.c*cosine[i][j];});
+  h.push(thickness);c.push(concentration);
+ }
+ return {h,c};
+}
+function step(state,E,G){
+ state.forEach((mode,i)=>{
+  const q2=(i+1)**2;
+  const muH=(settings.cap*q2+settings.interaction)*mode.u+G*(mode.u-mode.v);
+  const muC=E*mode.c;
+  const du=-q2*(muH+coupling*muC);
+  const dc=-q2*(coupling*muH+(coupling**2+diffusion)*muC);
+  const dv=(mode.u-mode.v)/settings.relaxation;
+  mode.u+=dt*du;mode.c+=dt*dc;mode.v+=dt*dv;
+ });
+}
+function reset(autoplay=false){
+ settings=Object.fromEntries(ids.map(id=>[id,Number($(id).value)]));
+ for(const id of ids)$(id+'Value').value=fmt(settings[id]);
+ modes=[-.135,-.045,-.02].map(u=>({u,c:0,v:u}));
+ reference=modes.map(mode=>({...mode}));
+ time=carry=0;last=null;history=[];finished=false;playing=autoplay;
+ $('play').textContent=playing?'Pause':'Play';
+ draw();
+}
+function drawFilm({h,c:concentration}){
+ const ctx=$('film').getContext('2d'),X=j=>29+j*582/(nx-1),Y=(h,sign)=>125-sign*65*h;
+ ctx.clearRect(0,0,640,245);ctx.fillStyle='#f5f8fb';ctx.fillRect(0,0,640,245);
+ ctx.fillStyle='#d4eaf7';ctx.beginPath();
+ for(let j=0;j<nx;j++)j?ctx.lineTo(X(j),Y(h[j],1)):ctx.moveTo(X(j),Y(h[j],1));
+ for(let j=nx-1;j>=0;j--)ctx.lineTo(X(j),Y(h[j],-1));
+ ctx.closePath();ctx.fill();
+ ctx.strokeStyle='#8791a1';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(29,125);ctx.lineTo(611,125);ctx.stroke();ctx.setLineDash([]);
+ for(const sign of [-1,1])for(let j=1;j<nx;j++){
+  const shade=52-30*Math.tanh((concentration[j]+concentration[j-1])*4);
+  ctx.strokeStyle='hsl(170 58% '+shade+'%)';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(X(j-1),Y(h[j-1],sign));ctx.lineTo(X(j),Y(h[j],sign));ctx.stroke();
+ }
+ ctx.font='15px Segoe UI';ctx.fillStyle='#182334';ctx.fillText('x–z cross-section · thickness h(x)',29,23);
+}
+function drawHistory(){
+ const ctx=$('history').getContext('2d'),left=55,right=615,top=22,bottom=185;
+ const maxTime=Math.max(6,time),X=t=>left+t/maxTime*(right-left),Y=h=>bottom-(h-.5)/.53*(bottom-top);
+ ctx.clearRect(0,0,640,235);ctx.font='14px Segoe UI';ctx.fillStyle='#182334';
+ ctx.fillText('Minimum h',left,15);
+ for(const h of [.5,.6,.7,.8,.9,1]){
+  ctx.fillStyle='#58667a';ctx.fillText(fmt(h,1),15,Y(h)+4);
+  ctx.strokeStyle='#dce4ed';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(left,Y(h));ctx.lineTo(right,Y(h));ctx.stroke();
+ }
+ for(let i=0;i<=4;i++)ctx.fillText(fmt(i*maxTime/4,1),X(i*maxTime/4)-7,bottom+20);
+ ctx.fillText('Model time',279,230);
+ ctx.save();ctx.beginPath();ctx.rect(left,top,right-left,bottom-top);ctx.clip();
+ for(const [key,color,dash] of [['reference','#c95a35',[6,4]],['film','#2477b5',[]]]){
+  ctx.strokeStyle=color;ctx.lineWidth=2.3;ctx.setLineDash(dash);ctx.beginPath();
+  history.forEach((p,i)=>i?ctx.lineTo(X(p.time),Y(p[key])):ctx.moveTo(X(p.time),Y(p[key])));ctx.stroke();
+ }
+ ctx.restore();
+}
+function draw(){
+ const film=profile(modes),plain=profile(reference),min=Math.min(...film.h),baseline=Math.min(...plain.h);
+ const point={time,film:min,reference:baseline};
+ if(!history.length||history.at(-1).time!==time)history.push(point);
+ drawFilm(film);drawHistory();
+ $('status').textContent='Minimum h = '+fmt(min,3)+' · riferimento = '+fmt(baseline,3)+(finished?' · Small-perturbation limit reached.':'');
+ return Math.min(min,baseline);
+}
+for(const id of ids)$(id).oninput=()=>reset(playing);
+$('reset').onclick=()=>reset(false);
+$('unstable').onclick=()=>{$('interaction').value='-1.4';$('cap').value='1';reset(true);};
+$('play').onclick=()=>{
+ if(finished){reset(true);return;}
+ playing=!playing;last=null;$('play').textContent=playing?'Pause':'Play';
+};
+function frame(now){
+ if(playing&&(last===null||now-last>=45)){
+  if(last!==null){
+   carry+=Math.min((now-last)/1000,.1);
+   while(carry>=dt){
+    step(modes,settings.surfactant,settings.polymer);step(reference,0,0);
+    time+=dt;carry-=dt;
+   }
+   if(Math.min(...profile(modes).h,...profile(reference).h)<=.55){
+    finished=true;playing=false;$('play').textContent='Restart';
+   }
+   draw();
+  }
+  last=now;
+ }
+ requestAnimationFrame(frame);
+}
+reset();requestAnimationFrame(frame);
+})();
+</script></body></html>

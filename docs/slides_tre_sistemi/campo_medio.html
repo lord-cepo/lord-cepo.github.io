@@ -1,0 +1,79 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mean-field lattice gas</title>
+<style>*{box-sizing:border-box}body{margin:0;color:#182334;font:17px/1.5 Segoe UI,Arial,sans-serif}main{max-width:1250px;margin:auto;padding:28px 40px}h1{margin:4px 0 12px}h2{font-size:20px}math{font-size:21px;margin:10px 0}.plots{display:grid;grid-template-columns:1fr 1.15fr;gap:28px}canvas{display:block;width:100%}#plane{touch-action:none;cursor:crosshair}label{display:block;margin:8px 0}input{width:100%;accent-color:#2477b5}footer{border-top:1px solid #ddd;padding-top:12px;margin-top:20px}a{color:#2477b5}@media(max-width:800px){main{padding:20px}.plots{grid-template-columns:1fr}}</style>
+<link rel="stylesheet" href="lesson-theme.css"><script src="course-navigation.js" defer></script></head><body class="course-slide"><nav class="course-bar" aria-label="Course navigation"><div class="course-steps"><a class="course-arrow" data-previous href="inserimento_particelle.html" aria-label="Previous slide">‹</a><label class="course-track"><span data-slide-position>5 / 10</span><input aria-label="Slide within chapter" type="range" min="1" max="10" value="5"></label><a class="course-arrow" data-next-slide href="potts.html" aria-label="Next slide">›</a></div><a class="course-contents" href="indice.html">Course contents</a><span class="course-chapter">05 · Phases and fluids</span></nav><main><p>CHAPTER 5 · FURTHER READING</p><h1>Mean-field lattice gas</h1>
+<div class="plots"><div><h2>Temperature and chemical potential</h2><canvas id="plane" width="540" height="285" aria-label="Temperatura orizzontale e potenziale chimico verticale"></canvas><label>Reduced temperature k<sub>B</sub>T/ε <input id="temp" type="range" min=".2" max="2" step=".001" value=".75"></label><label>Chemical potential μ/ε <input id="mu" type="range" min="-3" max="-1" step=".001" value="-2"></label><p id="parameters"></p><button id="coexist">Set μ/ε = −2</button></div><div><h2>Profile f(d) − f<sub>max</sub></h2><canvas id="curve" width="620" height="345" aria-label="Function f minus its maximum for densities from zero to one"></canvas><p id="peak"></p></div></div>
+<h2>From microstates to the most probable density</h2>
+<p>Let M be the number of sites and N the number occupied. Each occupied pair contributes −4ε/M. There are N(N−1)/2 pairs, and at fixed N all configurations have the same energy.</p>
+<math display="block"><mi>E</mi><mo>(</mo><mi>N</mi><mo>)</mo><mo>−</mo><mi>μ</mi><mi>N</mi><mo>=</mo><mo>−</mo><mfrac><mrow><mn>2</mn><mi>ε</mi></mrow><mi>M</mi></mfrac><mi>N</mi><mo>(</mo><mi>N</mi><mo>−</mo><mn>1</mn><mo>)</mo><mo>−</mo><mi>μ</mi><mi>N</mi></math>
+<p>Each microstate is weighted by its Boltzmann factor. To obtain the weight of N, multiply by the number of possible configurations.</p>
+<math display="block"><mi>P</mi><mo>(</mo><mi>N</mi><mo>)</mo><mo>∝</mo><mrow><mo>(</mo><mfrac linethickness="0"><mi>M</mi><mi>N</mi></mfrac><mo>)</mo></mrow><msup><mi>e</mi><mrow><mo>−</mo><mo>(</mo><mi>E</mi><mo>−</mo><mi>μ</mi><mi>N</mi><mo>)</mo><mo>/</mo><mo>(</mo><msub><mi>k</mi><mi>B</mi></msub><mi>T</mi><mo>)</mo></mrow></msup></math>
+<p>Con d = N/M, T* = k<sub>B</sub>T/ε and C = μ/ε, Stirling’s approximation gives log P(N)/M = f(d) plus a constant independent of d, up to corrections that vanish as M grows.</p>
+<math display="block"><mi>f</mi><mo>(</mo><mi>d</mi><mo>)</mo><mo>=</mo><mfrac><mrow><mn>2</mn><msup><mi>d</mi><mn>2</mn></msup><mo>+</mo><mi>C</mi><mi>d</mi></mrow><msup><mi>T</mi><mo>*</mo></msup></mfrac><mo>−</mo><mi>d</mi><mi>ln</mi><mi>d</mi><mo>−</mo><mo>(</mo><mn>1</mn><mo>−</mo><mi>d</mi><mo>)</mo><mi>ln</mi><mo>(</mo><mn>1</mn><mo>−</mo><mi>d</mi><mo>)</mo></math>
+<p>Red points mark global maxima. On the line C = −2 and for T* &lt; 1, both maxima have equal exponential weight. They merge at the mean-field critical point T* = 1 and d = 1/2. The simulation with four neighbours instead has a critical temperature of T* ≈ 0.5673.</p>
+<footer> · </footer></main>
+<script>
+'use strict';
+const $=id=>document.getElementById(id), plane=$('plane');
+const fmt=(v,n=3)=>v.toLocaleString('it-IT',{minimumFractionDigits:n,maximumFractionDigits:n});
+const entropyTerm=d=>d===0?0:d*Math.log(d);
+const profile=(d,T,C)=>(2*d*d+C*d)/T-entropyTerm(d)-entropyTerm(1-d);
+function stationary(T,C){
+ const df=d=>(4*d+C)/T+Math.log((1-d)/d);
+ const cuts=[1e-14];
+ if(T<1){const a=Math.sqrt(1-T);cuts.push((1-a)/2,(1+a)/2);}
+ cuts.push(1-1e-14);
+ const points=[0,1];
+ for(let i=1;i<cuts.length;i++){
+  let lo=cuts[i-1],hi=cuts[i],left=df(lo);
+  if(left===0)points.push(lo);
+  if(df(hi)===0)points.push(hi);
+  if(left*df(hi)>=0)continue;
+  for(let j=0;j<64;j++){
+   const mid=(lo+hi)/2,val=df(mid);
+   if(val===0){lo=hi=mid;break;}
+   if((val>0)===(left>0))lo=mid;else hi=mid;
+  }
+  points.push((lo+hi)/2);
+ }
+ return points;
+}
+function draw(){
+ const T=+$('temp').value,C=+$('mu').value;
+ const c=plane.getContext('2d'),X=t=>62+(t-.2)/1.8*456,Y=mu=>240-(mu+3)/2*207;
+ c.clearRect(0,0,540,285);c.fillStyle='#eff5fb';c.fillRect(62,33,456,207);
+ c.fillStyle='#a9c9e7';c.fillRect(62,33,X(1)-62,Y(-2)-33);
+ c.fillStyle='#e0ebf7';c.fillRect(X(1),33,518-X(1),207);
+ c.strokeStyle='#8791a1';c.strokeRect(62,33,456,207);
+ c.strokeStyle='#2477b5';c.beginPath();c.moveTo(62,Y(-2));c.lineTo(X(1),Y(-2));c.stroke();
+ c.font='15px Segoe UI';c.fillStyle='#182334';c.fillText('μ / ε',8,19);c.fillText('T*',496,277);
+ c.fillText('Liquid',79,57);c.fillText('Gas',79,220);c.fillText('Supercritical region',X(1)+14,57);
+ for(const t of [.2,.5,1,1.5,2])c.fillText(fmt(t,1),X(t)-11,260);
+ for(const mu of [-3,-2.5,-2,-1.5,-1])c.fillText(fmt(mu,1),8,Y(mu)+5);
+ c.beginPath();c.arc(X(1),Y(-2),4,0,2*Math.PI);c.fill();
+ c.strokeStyle='#d24c3a';c.lineWidth=2;c.beginPath();c.arc(X(T),Y(C),7,0,2*Math.PI);c.stroke();c.lineWidth=1;
+ const points=stationary(T,C),max=Math.max(...points.map(d=>profile(d,T,C)));
+ const peaks=points.filter(d=>Math.abs(profile(d,T,C)-max)<1e-11).sort((a,b)=>a-b).filter((d,i,a)=>i===0||d-a[i-1]>1e-8);
+ const values=Array.from({length:1001},(_,i)=>profile(i/1000,T,C)-max);
+ const low=Math.min(-.02,...values,...points.map(d=>profile(d,T,C)-max));
+ const g=$('curve').getContext('2d'),x=d=>72+526*d,y=v=>36+258*v/low;
+ g.clearRect(0,0,620,345);g.font='15px Segoe UI';
+ for(let i=0;i<=4;i++){
+  const v=low*i/4;g.strokeStyle='#dce4ed';g.beginPath();g.moveTo(72,y(v));g.lineTo(598,y(v));g.stroke();g.fillStyle='#182334';g.fillText(fmt(v,2),5,y(v)+5);g.fillText(fmt(i/4,2),x(i/4)-14,317);
+ }
+ g.fillText('Density d',305,338);g.fillText('f(d) − fmax',72,22);
+ g.strokeStyle='#2477b5';g.lineWidth=2;g.beginPath();values.forEach((v,i)=>i?g.lineTo(x(i/1000),y(v)):g.moveTo(x(0),y(v)));g.stroke();
+ g.fillStyle='#d24c3a';for(const d of peaks){g.beginPath();g.arc(x(d),y(0),6,0,2*Math.PI);g.fill();}
+ $('parameters').textContent='T* = '+fmt(T)+' · μ/ε = '+fmt(C);
+ $('peak').textContent=(peaks.length>1?'Most probable densities: ':'Most probable density: ')+peaks.map(d=>fmt(d,5)).join(' e ');
+}
+function point(e){
+ const r=plane.getBoundingClientRect(),x=(e.clientX-r.left)*540/r.width,y=(e.clientY-r.top)*285/r.height;
+ const clamp=v=>Math.max(0,Math.min(1,v));
+ $('temp').value=(.2+1.8*clamp((x-62)/456)).toFixed(3);
+ $('mu').value=(-3+2*clamp((240-y)/207)).toFixed(3);
+ draw();
+}
+plane.onpointerdown=e=>{plane.setPointerCapture(e.pointerId);point(e);};
+plane.onpointermove=e=>{if(plane.hasPointerCapture(e.pointerId))point(e);};
+$('temp').oninput=draw;$('mu').oninput=draw;$('coexist').onclick=()=>{$('mu').value=-2;draw();};draw();
+</script></body></html>

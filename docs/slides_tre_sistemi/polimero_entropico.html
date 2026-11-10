@@ -1,0 +1,85 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Entropic elasticity of a 2D polymer</title>
+<style>*{box-sizing:border-box}body{margin:0;color:#182334;font:17px/1.5 Segoe UI,Arial,sans-serif}main{max-width:1280px;margin:auto;padding:28px 42px}h1{margin:5px 0 18px}h2{font-size:20px}.layout{display:grid;grid-template-columns:1fr 1fr;gap:32px}.layout>section{min-width:0}canvas{display:block;width:100%;height:auto;background:#f5f8fb}#entropy{background:white}input{width:100%;accent-color:#2477b5}button{font:inherit;padding:6px 10px;background:white;border:1px solid #ccd3dd;border-radius:4px}math{font-size:21px;max-width:100%;overflow:auto;margin:14px 0}.muted{font-size:15px;color:#58667a}footer{border-top:1px solid #ddd;padding-top:15px;display:flex;gap:20px}a{color:#2477b5}@media(max-width:800px){main{padding:20px}.layout{grid-template-columns:1fr}}</style>
+<link rel="stylesheet" href="lesson-theme.css"><script src="course-navigation.js" defer></script></head><body class="course-slide"><nav class="course-bar" aria-label="Course navigation"><div class="course-steps"><a class="course-arrow" data-previous href="forza_entropica.html" aria-label="Previous slide">‹</a><label class="course-track"><span data-slide-position>2 / 8</span><input aria-label="Slide within chapter" type="range" min="1" max="8" value="2"></label><a class="course-arrow" data-next-slide href="pressione_osmotica.html" aria-label="Next slide">›</a></div><a class="course-contents" href="indice.html">Course contents</a><span class="course-chapter">06 · Entropic forces</span></nav><main><div class="muted">CHAPTER 6 · SLIDE 2</div><h1>Entropic elasticity of a 2D polymer</h1><div class="layout"><section>
+<h2>A chain with fixed endpoints</h2><canvas id="chain" width="640" height="260" aria-label="Una conformazione di un polimero con estremi alla stessa altezza"></canvas>
+<label>End-to-end distance x/a = <output id="distance"></output><input id="stretch" type="range" min="0" max="40" step="2" value="10"></label>
+<p><button id="play" type="button" aria-pressed="false">Start sampling</button> <button id="sample" type="button">New conformation</button> <span id="entropyValue"></span></p>
+<canvas id="entropy" width="640" height="220" aria-label="Entropia esatta e approssimazione quadratica in funzione dell’estensione"></canvas>
+<p class="muted">Blue shows the exact count. Dashed orange shows the small-extension approximation. The chain has 40 segments of length a. Segments can cross and sites can be revisited. Playback samples ten paths per second. Each draw is independent and can repeat a path.</p>
+</section><section>
+<h2>Counting conformations</h2>
+<p>Consider N steps of length a on a square lattice. A step can go right, left, up or down, with the same energy in every direction. Fix the first endpoint at (0, 0) and the second at (x, 0).</p>
+<p>In coordinates u = (X + Y)/a and v = (X − Y)/a, each step corresponds to choosing two independent increments of ±1. Both sums must equal x/a, so each sequence needs (N + x/a)/2 positive increments.</p>
+<math display="block"><mi>Ω</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>=</mo><msup><mrow><mo>(</mo><mfrac linethickness="0"><mi>N</mi><mrow><mo>(</mo><mi>N</mi><mo>+</mo><mi>x</mi><mo>/</mo><mi>a</mi><mo>)</mo><mo>/</mo><mn>2</mn></mrow></mfrac><mo>)</mo></mrow><mn>2</mn></msup><mo>,</mo><mspace width="1em"/><mi>S</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>=</mo><msub><mi>k</mi><mi>B</mi></msub><mi>ln</mi><mi>Ω</mi><mo>(</mo><mi>x</mi><mo>)</mo></math>
+<p>As the chain stretches, fewer paths reach the fixed endpoint. At full extension only one path is possible, with every step going right.</p>
+<h2>From entropy to Hooke’s law</h2>
+<p>For large N and x much smaller than the total length Na, applying Stirling’s approximation to the logarithm of the binomial coefficients gives a quadratic decrease in entropy.</p>
+<math display="block"><mi>S</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>−</mo><mi>S</mi><mo>(</mo><mn>0</mn><mo>)</mo><mo>≈</mo><mo>−</mo><mfrac><mrow><msub><mi>k</mi><mi>B</mi></msub><msup><mi>x</mi><mn>2</mn></msup></mrow><mrow><mi>N</mi><msup><mi>a</mi><mn>2</mn></msup></mrow></mfrac></math>
+<math display="block"><mi>F</mi><mo>=</mo><mi>T</mi><mfrac><mrow><mi>d</mi><mi>S</mi></mrow><mrow><mi>d</mi><mi>x</mi></mrow></mfrac><mo>≈</mo><mo>−</mo><mfrac><mrow><mn>2</mn><msub><mi>k</mi><mi>B</mi></msub><mi>T</mi></mrow><mrow><mi>N</mi><msup><mi>a</mi><mn>2</mn></msup></mrow></mfrac><mi>x</mi></math>
+<p>The minus sign means the chain pulls the movable end towards the fixed end. In this ideal model the stiffness grows with T because all conformations have the same internal energy.</p>
+</section></div></main>
+<script>
+'use strict';
+const N=40,$=id=>document.getElementById(id);
+const logFactorial=[0];
+for(let i=1;i<=N;i++)logFactorial[i]=logFactorial[i-1]+Math.log(i);
+function entropy(x){
+ const k=(N+x)/2;
+ return 2*(logFactorial[N]-logFactorial[k]-logFactorial[N-k]);
+}
+function signs(positive){
+ const list=Array.from({length:N},(_,i)=>i<positive?1:-1);
+ for(let i=N-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[list[i],list[j]]=[list[j],list[i]];}
+ return list;
+}
+function drawChain(distance){
+ const c=$('chain').getContext('2d'),u=signs((N+distance)/2),v=signs((N+distance)/2),points=[[0,0]];
+ let x=0,y=0;
+ for(let i=0;i<N;i++){x+=(u[i]+v[i])/2;y+=(u[i]-v[i])/2;points.push([x,y]);}
+ const minX=Math.min(-3,...points.map(p=>p[0])),maxX=Math.max(43,...points.map(p=>p[0]));
+ const extentY=Math.max(8,...points.map(p=>Math.abs(p[1])))+2;
+ const step=Math.min(600/(maxX-minX),225/(2*extentY)),X=x=>20+(x-minX)*step,Y=y=>130-y*step;
+ c.clearRect(0,0,640,260);
+ c.strokeStyle='#9daabd';c.setLineDash([5,5]);c.beginPath();c.moveTo(16,Y(0));c.lineTo(624,Y(0));c.stroke();c.setLineDash([]);
+ c.strokeStyle='#2477b5';c.lineWidth=2.5;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(X(x),Y(y)):c.moveTo(X(x),Y(y)));c.stroke();
+ for(const [pos,color] of [[0,'#182334'],[distance,'#c34c35']]){c.fillStyle=color;c.beginPath();c.arc(X(pos),Y(0),5,0,2*Math.PI);c.fill();}
+}
+function drawEntropy(distance){
+ const c=$('entropy').getContext('2d'),left=60,right=614,top=26,bottom=171,min=-entropy(0);
+ const X=x=>left+(right-left)*x/N,Y=s=>top+(bottom-top)*s/min;
+ c.clearRect(0,0,640,220);c.font='14px Segoe UI';c.fillStyle='#182334';
+ c.fillText('ΔS / kᴮ',left,17);
+ for(const x of [0,10,20,30,40])c.fillText(String(x),X(x)-5,bottom+20);
+ c.fillText('x / a',315,215);
+ for(const s of [0,-10,-20,-30,-40,-50]){
+  c.fillText(String(s),20,Y(s)+5);c.strokeStyle='#dce4ed';c.lineWidth=1;c.beginPath();c.moveTo(left,Y(s));c.lineTo(right,Y(s));c.stroke();
+ }
+ for(const [fn,color,dash] of [[x=>entropy(x)-entropy(0),'#2477b5',[]],[x=>-x*x/N,'#c34c35',[6,4]]]){
+  c.strokeStyle=color;c.lineWidth=2;c.setLineDash(dash);c.beginPath();for(let x=0;x<=N;x+=2)x?c.lineTo(X(x),Y(fn(x))):c.moveTo(X(x),Y(fn(x)));c.stroke();
+ }
+ c.setLineDash([]);c.fillStyle='#2477b5';c.beginPath();c.arc(X(distance),Y(entropy(distance)-entropy(0)),5,0,2*Math.PI);c.fill();
+}
+function update(){
+ const x=+$('stretch').value;
+ $('distance').value=x;
+ $('entropyValue').textContent='ΔS/kᴮ = '+(entropy(x)-entropy(0)).toLocaleString('it-IT',{maximumFractionDigits:2});
+ drawChain(x);drawEntropy(x);
+}
+$('stretch').oninput=update;
+let timer=null;
+function sample(){drawChain(+$('stretch').value);}
+$('sample').onclick=sample;
+$('play').onclick=()=>{
+ if(timer===null){
+  sample();
+  timer=setInterval(sample,100);
+ }else{
+  clearInterval(timer);
+  timer=null;
+ }
+ const playing=timer!==null;
+ $('play').textContent=playing?'Pause sampling':'Start sampling';
+ $('play').setAttribute('aria-pressed',String(playing));
+};
+update();
+</script></body></html>

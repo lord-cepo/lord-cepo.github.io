@@ -1,0 +1,152 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Depletion attraction</title>
+<style>*{box-sizing:border-box}body{margin:0;color:#182334;background:white;font:17px/1.5 Segoe UI,Arial,sans-serif}main{max-width:1280px;margin:auto;padding:28px 42px}h1{margin:6px 0 18px}h2{font-size:21px}.layout{display:grid;grid-template-columns:1.15fr 1fr;gap:32px}.layout>section{min-width:0}canvas{display:block;width:100%;height:auto}label{display:block;margin:14px 0}input{width:100%;accent-color:#2477b5}button{font:inherit;padding:7px 12px;border:1px solid #ccd3dd;background:white;border-radius:4px;cursor:pointer}.muted{font-size:15px;color:#58667a}math{font-size:21px;max-width:100%;overflow:auto;margin:14px 0}footer{display:flex;gap:18px;border-top:1px solid #ddd;padding-top:14px;margin-top:20px}a{color:#2477b5}@media(max-width:800px){main{padding:20px}.layout{grid-template-columns:1fr}}</style><link rel="stylesheet" href="lesson-theme.css"><script src="course-navigation.js" defer></script></head>
+<body class="course-slide"><nav class="course-bar" aria-label="Course navigation"><div class="course-steps"><a class="course-arrow" data-previous href="sedimentazione.html" aria-label="Previous slide">‹</a><label class="course-track"><span data-slide-position>5 / 8</span><input aria-label="Slide within chapter" type="range" min="1" max="8" value="5" ></label><a class="course-arrow" data-next-slide href="tensione_superficiale.html" aria-label="Next slide">›</a></div><a class="course-contents" href="indice.html">Course contents</a><span class="course-chapter">06 · Entropic forces</span></nav><main><div class="muted">CHAPTER 6 · SLIDE 5</div><h1>Depletion attraction</h1><div class="layout"><section>
+<h2>Two disks immersed in a gas of smaller disks</h2>
+<canvas id="gas" width="640" height="405" role="img" aria-label="Due dischi grandi con regioni di esclusione sovrapposte e dischi piccoli del solvente"></canvas>
+<label>Centre-to-centre distance d/R = <output id="distanceValue"></output><input type="range" id="distance" min="2" max="5" step=".01" value="3.10"></label>
+<p><button id="play">Play</button> <button id="reset">Reset to 3.10 R</button> <button id="release">Release the disks</button></p>
+<p id="stats"></p><p id="measuredForce"></p>
+<p class="muted">All small disks have radius 0.50 R. Dashed outlines mark regions their centres cannot enter, and green shows the overlap. In this ideal-solvent model, small disks can overlap each other. They bounce elastically off the walls and the large disks, which move horizontally with a fixed midpoint.</p>
+</section><section>
+<h2>Why moving closer frees up space</h2>
+<p>The large disks have radius R and the small ones have radius r = 0.50 R. A small disk’s centre must stay at least a = R + r from each large disk’s centre. When d &lt; 2a, the two excluded regions overlap. Their union excludes less area because the overlap is counted only once, leaving more accessible area.</p>
+<math display="block"><msub><mi>A</mi><mtext>sovr</mtext></msub><mo>(</mo><mi>d</mi><mo>)</mo><mo>=</mo><mn>2</mn><msup><mi>a</mi><mn>2</mn></msup><mi>arccos</mi><mo>(</mo><mfrac><mi>d</mi><mrow><mn>2</mn><mi>a</mi></mrow></mfrac><mo>)</mo><mo>−</mo><mfrac><mi>d</mi><mn>2</mn></mfrac><msqrt><mn>4</mn><msup><mi>a</mi><mn>2</mn></msup><mo>−</mo><msup><mi>d</mi><mn>2</mn></msup></msqrt></math>
+<p>The formula applies for d &lt; 2a. Otherwise the overlap is zero. If A₀ is the accessible area with the disks far apart, bringing them closer increases it to A<sub>free</sub> = A₀ + A<sub>overlap</sub>. For N independent small disks, the number of configurations grows as A<sub>free</sub><sup>N</sup>.</p>
+<math display="block"><mi>Δ</mi><mi>S</mi><mo>=</mo><mi>N</mi><msub><mi>k</mi><mi>B</mi></msub><mi>ln</mi><mfrac><msub><mi>A</mi><mtext>libera</mtext></msub><msub><mi>A</mi><mn>0</mn></msub></mfrac></math>
+<h2>From entropy to the attractive force</h2>
+<p>The force along coordinate d is negative in the overlap region. Gas pressure p multiplies the loss of accessible area per unit increase in separation.</p>
+<math display="block"><msub><mi>F</mi><mi>d</mi></msub><mo>=</mo><mi>T</mi><mfrac><mrow><mi>d</mi><mi>S</mi></mrow><mrow><mi>d</mi><mi>d</mi></mrow></mfrac><mo>=</mo><mi>p</mi><mfrac><mrow><mi>d</mi><msub><mi>A</mi><mtext>sovr</mtext></msub></mrow><mrow><mi>d</mi><mi>d</mi></mrow></mfrac><mo>=</mo><mo>−</mo><mi>p</mi><msqrt><mn>4</mn><msup><mi>a</mi><mn>2</mn></msup><mo>−</mo><msup><mi>d</mi><mn>2</mn></msup></msqrt></math>
+<p>Here p = Nk<sub>B</sub>T/A<sub>free</sub> is the pressure in two dimensions, or force per unit length. The force tends to reduce d and vanishes beyond a surface-to-surface separation of 2r. The simulation starts paused with the disks free to move and just outside this range. Press Play to follow the collisions. They can bring the disks into the attraction region, where the disks tend to move closer. The initial gas configuration is reproducible. Compare the analytical force with the time-dependent average inferred from collision impulses.</p>
+</section></div></main>
+<script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id),c=$('gas').getContext('2d');
+const N=75,R=1,r=.5,a=R+r,half=[4,2.5],diskMass=20;
+const baseline=8*5-2*Math.PI*a*a;
+const points=[];
+const initialDistance=3.10;
+let distance=initialDistance,playing=false,released=false,last=0,relativeVelocity=0;
+const recent=[];
+let batchImpulse=0,batchTime=0,timeRemainder=0;
+const format=(v,d=2)=>v.toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d});
+function overlap(d){return d>=2*a?0:2*a*a*Math.acos(d/(2*a))-d/2*Math.sqrt(4*a*a-d*d);}
+function force(d){return d>=2*a?0:-N/(baseline+overlap(d))*Math.sqrt(4*a*a-d*d);}
+function allowed(x,y){
+ return Math.abs(x)<=half[0]&&Math.abs(y)<=half[1]&&
+ (Math.abs(x)-distance/2)**2+y*y>=a*a;
+}
+function thermalVelocity(random){
+ return Math.sqrt(-2*Math.log(1-random()))*Math.cos(2*Math.PI*random());
+}
+function sample(random=Math.random){
+ let position;
+ do{position=half.map(limit=>limit*(2*random()-1));}while(!allowed(...position));
+ return [...position,thermalVelocity(random),thermalVelocity(random)];
+}
+function repair(){
+ for(let i=0;i<points.length;i++)if(!allowed(...points[i]))points[i]=sample();
+}
+function reflectWalls(p){
+ for(let axis=0;axis<2;axis++){
+  const limit=half[axis];
+  if(p[axis]>limit){p[axis]=2*limit-p[axis];p[axis+2]=-Math.abs(p[axis+2]);}
+  if(p[axis]<-limit){p[axis]=-2*limit-p[axis];p[axis+2]=Math.abs(p[axis+2]);}
+ }
+}
+function advance(dt){
+ if(released){
+  distance+=relativeVelocity*dt;
+  if(distance<2*R){distance=2*R;relativeVelocity=Math.abs(relativeVelocity);}
+  if(distance>5){distance=5;relativeVelocity=-Math.abs(relativeVelocity);}
+ }
+ for(const p of points){
+  for(let axis=0;axis<2;axis++)p[axis]+=p[axis+2]*dt;
+  // Resolve contacts in both exclusion regions, including the narrow gap.
+  for(let attempt=0;attempt<5;attempt++){
+   reflectWalls(p);
+   const sign=p[0]<0?-1:1,dx=p[0]-sign*distance/2;
+   const radius=Math.hypot(dx,p[1]);
+   if(radius>=a)break;
+   const nx=radius?dx/radius:sign,ny=radius?p[1]/radius:0;
+   p[0]=sign*distance/2+(a+1e-9)*nx;
+   p[1]=(a+1e-9)*ny;
+   const normalSpeed=(p[2]-sign*relativeVelocity/2)*nx+p[3]*ny;
+   if(normalSpeed>=0)continue;
+   const impulse=-2*normalSpeed/(released?1+nx*nx/(2*diskMass):1);
+   p[2]+=impulse*nx;p[3]+=impulse*ny;
+   const generalizedImpulse=-sign*impulse*nx/2;
+   batchImpulse+=generalizedImpulse;
+   if(released)relativeVelocity+=2*generalizedImpulse/diskMass;
+  }
+ }
+ batchTime+=dt;
+}
+function measure(){
+ recent.push([batchImpulse,batchTime]);
+ if(recent.length>90)recent.shift();
+ batchImpulse=batchTime=0;
+}
+function setReleased(value){
+ released=value;relativeVelocity=0;
+ recent.length=0;batchImpulse=batchTime=0;
+ $('release').textContent=value?'Hold the disks fixed':'Release the disks';
+}
+function draw(){
+ const X=x=>320+63*x,Y=y=>203-63*y;
+ const circle=(x,y,radius)=>{c.beginPath();c.arc(X(x),Y(y),63*radius,0,2*Math.PI);};
+ c.clearRect(0,0,640,405);c.fillStyle='#edf5fb';c.fillRect(X(-half[0]-r),Y(half[1]+r),126*(half[0]+r),126*(half[1]+r));
+ c.strokeStyle='#607e97';c.lineWidth=1;c.strokeRect(X(-half[0]-r),Y(half[1]+r),126*(half[0]+r),126*(half[1]+r));
+ for(const x of [-distance/2,distance/2]){circle(x,0,a);c.fillStyle='#dce7f0';c.fill();}
+ c.save();circle(-distance/2,0,a);c.clip();circle(distance/2,0,a);c.fillStyle='#a6d1bd';c.fill();c.restore();
+ c.fillStyle='rgba(36,119,181,.20)';
+ c.strokeStyle='rgba(28,103,155,.55)';
+ c.lineWidth=.8;
+ for(const [x,y] of points){circle(x,y,r);c.fill();c.stroke();}
+ c.setLineDash([6,4]);c.strokeStyle='#607e97';c.lineWidth=2;
+ for(const x of [-distance/2,distance/2]){circle(x,0,a);c.stroke();}
+ c.setLineDash([]);
+ for(const x of [-distance/2,distance/2]){circle(x,0,R);c.fillStyle='#6888a3';c.fill();c.strokeStyle='#34536d';c.stroke();}
+ if(force(distance)<0){
+  c.fillStyle='#fff';c.font='bold 30px Segoe UI';c.textAlign='center';
+  c.fillText('→',X(-distance/2),Y(0)+10);c.fillText('←',X(distance/2),Y(0)+10);
+ }
+ $('distanceValue').value=format(distance);
+ $('stats').textContent='Recovered area / R² = '+format(overlap(distance),3)+' · ΔS/kᴮ = '+format(N*Math.log1p(overlap(distance)/baseline),3)+' · Forza teorica = '+format(force(distance),2);
+ const elapsed=recent.reduce((total,sample)=>total+sample[1],0);
+ $('measuredForce').textContent=elapsed?'Mean collision force = '+format(recent.reduce((total,sample)=>total+sample[0],0)/elapsed,2)+' (in unità kᴮT/R)':'';
+
+}
+$('distance').oninput=()=>{setReleased(false);distance=Number($('distance').value);repair();draw();};
+$('play').onclick=()=>{playing=!playing;$('play').textContent=playing?'Pause':'Play';};
+$('release').onclick=()=>{setReleased(!released);playing=true;$('play').textContent='Pause';};
+function frame(now){
+ if(playing&&now-last>35){
+  const dt=Math.min((now-last)/1000,.06);last=now;
+  timeRemainder+=dt;
+  while(timeRemainder>=.004){advance(.004);timeRemainder-=.004;}
+  if(released)$('distance').value=distance.toFixed(2);
+  measure();draw();
+ }
+ requestAnimationFrame(frame);
+}
+function reset(){
+ distance=initialDistance;
+ $('distance').value=initialDistance.toFixed(2);
+ let seed=2;
+ function initialRandom(){
+  seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+  return seed/4294967296;
+ }
+ points.length=0;
+ for(let i=0;i<N;i++)points.push(sample(initialRandom));
+ setReleased(true);
+ playing=false;
+ last=0;timeRemainder=0;
+ $('play').textContent='Play';
+ draw();
+}
+$('reset').onclick=reset;
+reset();requestAnimationFrame(frame);
+})();
+</script></body></html>

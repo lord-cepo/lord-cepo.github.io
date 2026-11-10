@@ -1,0 +1,234 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>XY model and vortices</title>
+<style>*{box-sizing:border-box}body{margin:0;color:#182334;font:17px/1.5 Segoe UI,Arial,sans-serif}main{max-width:1220px;margin:auto;padding:28px 42px}h1{margin:4px 0 18px}.layout{display:grid;grid-template-columns:1fr;gap:14px}canvas{display:block;width:100%;aspect-ratio:16/9}button,select{font:inherit;padding:7px;border:1px solid #ccd3dd;background:white;border-radius:4px}input[type=range]{width:100%;accent-color:#2477b5}.controls,footer,.legend{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:14px 0}.wheel{width:92px;aspect-ratio:1;border-radius:50%;background:conic-gradient(from 60deg,#ef4545 0deg 60deg,#bd52d5 60deg 120deg,#4474e8 120deg 180deg,#23bdd0 180deg 240deg,#55b947 240deg 300deg,#f4cc34 300deg 360deg);flex:none}math{font-size:21px;margin:12px 0}footer{border-top:1px solid #ddd;padding-top:14px}a{color:#2477b5}.muted{color:#58667a;font-size:15px}@media(max-width:800px){main{padding:20px}.layout{grid-template-columns:1fr}}</style>
+<link rel="stylesheet" href="lesson-theme.css"><script src="course-navigation.js" defer></script></head><body class="course-slide"><nav class="course-bar" aria-label="Course navigation"><div class="course-steps"><a class="course-arrow" data-previous href="potts.html" aria-label="Previous slide">‹</a><label class="course-track"><span data-slide-position>7 / 10</span><input aria-label="Slide within chapter" type="range" min="1" max="10" value="7"></label><a class="course-arrow" data-next-slide href="blume_capel.html" aria-label="Next slide">›</a></div><a class="course-contents" href="indice.html">Course contents</a><span class="course-chapter">05 · Phases and fluids</span></nav><main><div class="muted">CHAPTER 5 · SLIDE 4</div><h1>XY model: continuous spins and vortices</h1><div class="layout"><div><canvas id="grid" width="1600" height="900" aria-label="Spin orientations and vortex positions on the lattice"></canvas><p id="stats"></p><p id="backend" class="muted" role="status">Checking for WebGPU…</p><div class="controls"><button id="play">Play</button><button id="step">1 sweep</button><button id="panorama">Initial spin field</button><button id="pair">Initial vortex pair</button><button id="random">Random spins</button></div><label>Temperature k<sub>B</sub>T/J = <output id="value">0,00</output><input id="temp" type="range" min="0" max="2" step=".01" value="0"></label><div class="controls"><label><input id="smooth" type="checkbox"> Interpolate display</label><label><input id="marks" type="checkbox"> Mark vortices (+/−)</label></div><p class="muted">1600 × 900 lattice. Each cell is coloured by its spin orientation. Interpolation smooths the displayed pixels.</p></div><div>
+<div class="legend"><div class="wheel" role="img" aria-label="Colour wheel for spin angles"></div><p>The wheel divides orientations into six 60° sectors. The spin angles themselves vary continuously.</p></div>
+<p>Each site on the periodic lattice holds a spin with a continuous angle. Neighbouring spins lower their energy by aligning.</p>
+<math display="block"><mi>H</mi><mo>=</mo><mo>−</mo><mi>J</mi><munder><mo>∑</mo><mrow><mo>⟨</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo>⟩</mo></mrow></munder><mi>cos</mi><mo>(</mo><msub><mi>θ</mi><mi>i</mi></msub><mo>−</mo><msub><mi>θ</mi><mi>j</mi></msub><mo>)</mo></math>
+<p>Metropolis sampling proposes a rotation of a randomly chosen spin. It accepts the rotation with probability min(1, exp(−ΔH/k<sub>B</sub>T)). On the GPU, a sweep proposes one rotation per site in two checkerboard passes. On the CPU, a sweep contains one proposal per site on average.</p>
+<p>To detect a vortex, traverse the four sides of a plaquette counterclockwise and sum the angle differences wrapped into the range −π to π. A winding of +2π marks a vortex, and −2π marks an antivortex.</p>
+<p><strong>At low temperature</strong> thermal vortices are rare and tend to remain bound to antivortices. Heating can unbind these pairs and increase the number of defects. This is the mechanism of the Berezinskii–Kosterlitz–Thouless transition. <a href="https://doi.org/10.1088/0022-3719/6/7/010">Kosterlitz and Thouless</a></p>
+<p class="muted">The initial field has correlated orientations and several defects. Press Play to see it relax at zero temperature. Choose Initial vortex pair to isolate one vortex and one antivortex.</p>
+</div></div><footer><span class="muted">5 · 4 / 7</span></footer></main>
+<script>
+'use strict';
+const width=1600,height=900,N=width*height,tau=2*Math.PI,angles=new Float64Array(N);
+const $=id=>document.getElementById(id),c=$('grid').getContext('2d');
+const wrap=a=>a-tau*Math.floor((a+Math.PI)/tau);
+const idx=(x,y)=>((y+height)%height)*width+(x+width)%width;
+let playing=false,sweeps=0,last=0,busy=false,gpu=null;
+const pixels=c.createImageData(width,height);
+function seedPanorama(){
+ const knots=4;
+ let seed=371;
+ const phase=Array.from({length:knots*knots},()=>{
+  seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+  return tau*seed/4294967296;
+ });
+ const u=phase.map(Math.cos),v=phase.map(Math.sin);
+ const ease=t=>t*t*(3-2*t);
+ for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+  const gx=x*knots/width,gy=y*knots/height;
+  const ix=Math.floor(gx),iy=Math.floor(gy);
+  const a=ease(gx-ix),b=ease(gy-iy);
+  const i=iy*knots+ix,j=iy*knots+(ix+1)%knots;
+  const k=((iy+1)%knots)*knots+ix,l=((iy+1)%knots)*knots+(ix+1)%knots;
+  const blend=field=>(1-b)*((1-a)*field[i]+a*field[j])+b*((1-a)*field[k]+a*field[l]);
+  const texture=.13*Math.sin(tau*(11*x/width+7*y/height))+.09*Math.sin(tau*(19*x/width-13*y/height));
+  angles[y*width+x]=wrap(Math.atan2(blend(v),blend(u))+texture);
+ }
+ $('temp').value='0';
+ $('temp').oninput();
+ sweeps=0;upload();pause();draw();
+}
+function seedPair(){
+ for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+  const dy=((height-1)/2-y)/2,dx=(x-(width-1)/2)/2;
+  const phase=wrap(Math.atan2(dy-4,dx+4)-Math.atan2(dy+4,dx-4));
+  const taper=Math.max(0,Math.min(1,(28-Math.hypot(dx,dy))/12));
+  angles[idx(x,y)]=wrap(phase*taper+2.75);
+ }
+ sweeps=0;upload();pause();draw();
+}
+function pause(){playing=false;$('play').textContent='Play';}
+function sweep(){
+ const T=+$('temp').value;
+ for(let j=0;j<N;j++){
+  const i=Math.floor(Math.random()*N),x=i%width,y=Math.floor(i/width);
+  const old=angles[i],next=wrap(old+(2*Math.random()-1)*Math.PI/2);
+  let d=0;
+  for(const k of [idx(x-1,y),idx(x+1,y),idx(x,y-1),idx(x,y+1)])d+=Math.cos(old-angles[k])-Math.cos(next-angles[k]);
+  if(d<=0||(T>0&&Math.random()<Math.exp(-d/T)))angles[i]=next;
+ }
+ sweeps++;
+}
+function defects(){
+ const found=[];
+ for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+  const a=angles[idx(x,y+1)],b=angles[idx(x+1,y+1)],d=angles[idx(x+1,y)],e=angles[idx(x,y)];
+  const charge=Math.round((wrap(b-a)+wrap(d-b)+wrap(e-d)+wrap(a-e))/tau);
+  if(charge)found.push({x,y,charge});
+ }
+ return found;
+}
+function draw(){
+ const palette=[[239,69,69],[244,204,52],[85,185,71],[35,189,208],[68,116,232],[189,82,213]];
+ for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+  const angle=angles[y*width+x];
+  const sector=(Math.floor(angle/tau*6+.5)+6)%6;
+  const offset=4*(y*width+x);
+  for(let channel=0;channel<3;channel++)pixels.data[offset+channel]=palette[sector][channel];
+  pixels.data[offset+3]=255;
+ }
+ c.putImageData(pixels,0,0);
+ $('grid').style.imageRendering=$('smooth').checked?'auto':'pixelated';
+ const vortices=defects();
+ let positive=0;
+ for(const v of vortices){
+  if(v.charge>0)positive++;
+  if(!$('marks').checked)continue;
+  const x=(v.x+1)%width,y=(v.y+1)%height;
+  c.beginPath();c.arc(x,y,5,0,tau);c.fillStyle=v.charge>0?'#fff':'#182334';c.fill();
+  c.strokeStyle=v.charge>0?'#182334':'#fff';c.lineWidth=1;c.stroke();
+  c.fillStyle=c.strokeStyle;c.font='bold 10px Arial';c.textAlign='center';c.textBaseline='middle';
+  c.fillText(v.charge>0?'+':'−',x,y);
+ }
+ $('stats').textContent='Sweep '+sweeps+' · Vortici '+positive+' · Antivortici '+(vortices.length-positive);
+}
+
+const shader = `
+struct Params { width:u32, height:u32, parity:u32, seed:u32, temperature:f32 }
+@group(0) @binding(0) var<storage,read_write> spins:array<f32>;
+@group(0) @binding(1) var<uniform> p:Params;
+
+fn random(key:u32)->f32 {
+ var x=key;
+ x=(x^(x>>16u))*0x7feb352du;
+ x=(x^(x>>15u))*0x846ca68bu;
+ return f32((x^(x>>16u))>>8u)/16777216.0;
+}
+
+@compute @workgroup_size(128)
+fn update(@builtin(global_invocation_id) id:vec3<u32>) {
+ let width=p.width;
+ let total=width*p.height;
+ let k=id.x;
+ if(k>=total/2u){return;}
+ let y=k/(width/2u);
+ let i=2u*k+((y+p.parity)&1u);
+ let x=i%width;
+ let old=spins[i];
+ let key=p.seed^k;
+ let proposed=old+(2.0*random(key)-1.0)*1.57079632679;
+ let next=proposed-6.28318530718*floor((proposed+3.14159265359)/6.28318530718);
+ let neighbors=array<u32,4>(
+  y*width+(x+width-1u)%width, y*width+(x+1u)%width,
+  (i+total-width)%total, (i+width)%total
+ );
+ var delta=0.0;
+ for(var j=0u;j<4u;j++){
+  let other=spins[neighbors[j]];
+  delta+=cos(old-other)-cos(next-other);
+ }
+ if(delta<=0.0 || (p.temperature>0.0 && random(key^0x9e3779b9u)<exp(-delta/p.temperature))){
+  spins[i]=next;
+ }
+}
+`;
+const gpuBatchSweeps=20;
+function upload(){
+ if(gpu)gpu.device.queue.writeBuffer(gpu.state,0,Float32Array.from(angles));
+}
+function useCPU(){
+ const previous=gpu;
+ gpu=null;
+ if(previous)for(const buffer of [previous.state,previous.read,previous.params])buffer.destroy();
+ $('backend').textContent='CPU · WebGPU unavailable';
+}
+async function initGPU(){
+ try{
+  const adapter=await navigator.gpu?.requestAdapter();
+  if(!adapter){useCPU();return;}
+  const device=await adapter.requestDevice();
+  const module=device.createShaderModule({code:shader});
+  const info=await module.getCompilationInfo();
+  if(info.messages.some(message=>message.type==='error')){
+   throw Error(info.messages.map(message=>message.message).join('\n'));
+  }
+  const layout=device.createBindGroupLayout({entries:[
+   {binding:0,visibility:GPUShaderStage.COMPUTE,buffer:{type:'storage'}},
+   {binding:1,visibility:GPUShaderStage.COMPUTE,buffer:{type:'uniform',hasDynamicOffset:true,minBindingSize:20}}
+  ]});
+  const pipeline=await device.createComputePipelineAsync({
+   layout:device.createPipelineLayout({bindGroupLayouts:[layout]}),
+   compute:{module,entryPoint:'update'}
+  });
+  const U=GPUBufferUsage,bytes=N*4;
+  const state=device.createBuffer({size:bytes,usage:U.STORAGE|U.COPY_SRC|U.COPY_DST});
+  const read=device.createBuffer({size:bytes,usage:U.MAP_READ|U.COPY_DST});
+  const stride=device.limits.minUniformBufferOffsetAlignment;
+  const params=device.createBuffer({size:2*gpuBatchSweeps*stride,usage:U.UNIFORM|U.COPY_DST});
+  const group=device.createBindGroup({layout,entries:[
+   {binding:0,resource:{buffer:state}},
+   {binding:1,resource:{buffer:params,size:20}}
+  ]});
+  gpu={device,pipeline,state,read,params,group,stride,bytes};
+  upload();
+  $('backend').textContent='WebGPU · 20 sweeps per update';
+  device.lost.then(()=>{if(gpu?.device===device)useCPU();});
+ }catch(error){console.warn(error);useCPU();}
+}
+async function gpuSweep(engine,count){
+ const {device,pipeline,state,read,params,group,stride,bytes}=engine;
+ const temperature=+$('temp').value;
+ const encoder=device.createCommandEncoder();
+ const data=new ArrayBuffer(2*count*stride);
+ for(let sweepIndex=0;sweepIndex<count;sweepIndex++){
+  const first=Math.random()<.5?0:1;
+  for(let passIndex=0;passIndex<2;passIndex++){
+   const offset=(2*sweepIndex+passIndex)*stride;
+   const parity=first^passIndex;
+   new Uint32Array(data,offset,4).set([width,height,parity,Math.floor(Math.random()*4294967296)]);
+   new Float32Array(data,offset+16,1)[0]=temperature;
+   const pass=encoder.beginComputePass();
+   pass.setPipeline(pipeline);
+   pass.setBindGroup(0,group,[offset]);
+   pass.dispatchWorkgroups(Math.ceil(N/256));
+   pass.end();
+  }
+ }
+ device.queue.writeBuffer(params,0,data);
+ encoder.copyBufferToBuffer(state,0,read,0,bytes);
+ device.queue.submit([encoder.finish()]);
+ await read.mapAsync(GPUMapMode.READ);
+ try{angles.set(new Float32Array(read.getMappedRange()));}
+ finally{read.unmap();}
+ sweeps+=count;
+}
+async function advance(count=1){
+ if(busy)return;
+ busy=true;
+ for(const id of ['step','panorama','pair','random'])$(id).disabled=true;
+ try{
+  if(gpu)await gpuSweep(gpu,count);else sweep();
+ }catch(error){
+  console.warn(error);
+  useCPU();
+  sweep();
+ }finally{
+  busy=false;
+  for(const id of ['step','panorama','pair','random'])$(id).disabled=false;
+ }
+ draw();
+}
+
+$('play').onclick=()=>{playing=!playing;$('play').textContent=playing?'Pause':'Play';};
+$('step').onclick=()=>{pause();void advance();};
+$('panorama').onclick=seedPanorama;
+$('pair').onclick=seedPair;
+$('random').onclick=()=>{for(let i=0;i<N;i++)angles[i]=wrap(Math.random()*tau);sweeps=0;upload();pause();draw();};
+$('temp').oninput=()=>{$('value').value=(+$('temp').value).toLocaleString('it-IT',{minimumFractionDigits:2});};
+$('marks').onchange=draw;
+$('smooth').onchange=draw;
+function frame(t){if(playing&&!busy&&t-last>50){last=t;void advance(gpu?gpuBatchSweeps:1);}requestAnimationFrame(frame);}
+seedPanorama();void initGPU();requestAnimationFrame(frame);
+</script></body></html>

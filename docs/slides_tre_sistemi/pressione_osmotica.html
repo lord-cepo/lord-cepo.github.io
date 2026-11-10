@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Osmotic pressure and entropy of mixing</title>
+<style>*{box-sizing:border-box}body{margin:0;color:#182334;font:17px/1.5 'Segoe UI',Arial,sans-serif}main{max-width:1280px;margin:auto;padding:28px 42px}h1{font-size:34px;margin:6px 0 18px}h2{font-size:21px;margin:16px 0 8px}.layout{display:grid;grid-template-columns:1fr 1.08fr;gap:34px}.layout>section{min-width:0}canvas{display:block;width:100%;height:auto}p{margin:10px 0}.muted{color:#58667a;font-size:15px}label{display:block;margin:16px 0 8px}input[type=range]{width:100%;accent-color:#2477b5}.readouts{display:flex;gap:8px 22px;flex-wrap:wrap;color:#27577c;font-variant-numeric:tabular-nums}math{font-size:22px;max-width:100%;overflow:auto;margin:14px 0}button{font:inherit;padding:7px 12px;background:white;border:1px solid #ccd3dd;border-radius:4px;cursor:pointer}footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;border-top:1px solid #ddd;margin-top:22px;padding-top:14px}a{color:#2477b5}@media(max-width:800px){main{padding:20px}.layout{grid-template-columns:1fr}h1{font-size:28px}math{font-size:18px}}</style><link rel="stylesheet" href="lesson-theme.css"><script src="course-navigation.js" defer></script></head>
+<body class="course-slide"><nav class="course-bar" aria-label="Course navigation"><div class="course-steps"><a class="course-arrow" data-previous href="polimero_entropico.html" aria-label="Previous slide">‹</a><label class="course-track"><span data-slide-position>3 / 8</span><input aria-label="Slide within chapter" type="range" min="1" max="8" value="3" ></label><a class="course-arrow" data-next-slide href="sedimentazione.html" aria-label="Next slide">›</a></div><a class="course-contents" href="indice.html">Course contents</a><span class="course-chapter">06 · Entropic forces</span></nav><main><div class="muted">CHAPTER 6 · SLIDE 3</div><h1>Osmotic pressure and entropy of mixing</h1>
+<div class="layout"><section>
+<h2>A membrane lets only the solvent through</h2>
+<canvas id="cell" width="640" height="280" role="img" aria-label="Soluzione a sinistra e solvente puro a destra, separati da una membrana"></canvas>
+<p>Solution volume Vₛ/V = <output id="volumeValue"></output></p>
+<label><input id="mixed" type="checkbox"> Remove the membrane</label>
+<div class="readouts"><span id="pressure"></span><span id="entropy"></span></div>
+<p><button id="play" type="button">Pause</button> <button id="reset" type="button">Reset</button></p><p id="distribution"></p><p class="muted" id="caption"></p>
+<p>The piston starts at 20% and stops at the 80% limit. The theoretical osmotic pressure decreases as the solution expands.</p>
+</section><section>
+<h2>The solute gains configurations</h2>
+<p>Consider Nₛ solute particles in a dilute ideal solution at temperature T. With the membrane in place they can occupy only Vₛ. Once it is removed, they can spread through the total volume V. Their configuration weight is proportional to the accessible volume raised to Nₛ.</p>
+<math display="block"><msub><mi>ΔS</mi><mtext>mesc</mtext></msub><mo>≈</mo><msub><mi>N</mi><mi>s</mi></msub><msub><mi>k</mi><mi>B</mi></msub><mi>ln</mi><mfrac><mi>V</mi><msub><mi>V</mi><mi>s</mi></msub></mfrac></math>
+<p>In the dilute limit this expression gives the dominant contribution to mixing. For example, if the solute initially occupies half the vessel, the gain is Nₛk<sub>B</sub> ln 2.</p>
+<h2>What pressure stops osmosis?</h2>
+<p>With the membrane in place, solvent entering the solution can increase its volume and give the solute more space. Osmotic pressure Π is the pressure difference between the solution and pure-solvent sides needed to stop the net flow. At equilibrium the work of expansion against this difference balances the entropy gain.</p>
+<math display="block"><mi>Π</mi><mo>=</mo><mi>T</mi><msub><mrow><mo>(</mo><mfrac><mrow><mi>∂</mi><mi>S</mi></mrow><mrow><mi>∂</mi><msub><mi>V</mi><mi>s</mi></msub></mrow></mfrac><mo>)</mo></mrow><mrow><mi>T</mi><mo>,</mo><msub><mi>N</mi><mi>s</mi></msub></mrow></msub><mo>≈</mo><mfrac><mrow><msub><mi>N</mi><mi>s</mi></msub><msub><mi>k</mi><mi>B</mi></msub><mi>T</mi></mrow><msub><mi>V</mi><mi>s</mi></msub></mfrac><mo>=</mo><mi>c</mi><mi>R</mi><mi>T</mi></math>
+<p>This is van ’t Hoff’s law. Here c is the molar concentration of the solute, nₛ/Vₛ. The pressure has the same dependence on concentration and temperature as an ideal gas.</p>
+</section></div>
+</main>
+<script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id),ctx=$('cell').getContext('2d');
+const left=24,right=616,top=52,bottom=228,length=right-left;
+const solute=[],solvent=[];
+const format=(n,digits)=>n.toLocaleString('it-IT',{minimumFractionDigits:digits,maximumFractionDigits:digits});
+let fraction=.2,mixed=false,playing=true,last=null,stopped=false,solventHits=0,soluteHits=0;
+const membraneX=()=>left+length*fraction;
+function populate(points,count,end){
+ points.length=0;
+ for(let i=0;i<count;i++){
+  const angle=Math.random()*2*Math.PI;
+  const speed=180*Math.sqrt(-2*Math.log(1-Math.random()));
+  points.push([left+Math.random()*(end-left),top+Math.random()*(bottom-top),speed*Math.cos(angle),speed*Math.sin(angle)]);
+ }
+}
+function reset(){
+ fraction=.2;mixed=false;last=null;stopped=false;solventHits=soluteHits=0;
+ $('mixed').checked=false;
+ populate(solvent,120,right);populate(solute,24,membraneX());draw();
+}
+function advance(dt){
+ const membrane=membraneX();
+ let impulse=0;
+ for(const [points,isSolute] of [[solvent,false],[solute,true]]){
+  for(const p of points){
+   const x=p[0];
+   p[0]+=p[2]*dt;p[1]+=p[3]*dt;
+   if(!mixed&&(x<=membrane)!==(p[0]<=membrane)&&(isSolute||Math.random()<.2)){
+    impulse+=2*p[2];
+    p[0]=2*membrane-p[0];p[2]=-p[2];
+    if(isSolute)soluteHits++;else solventHits++;
+   }
+   for(const [axis,min,max] of [[0,left,right],[1,top,bottom]]){
+    if(p[axis]<min){p[axis]=2*min-p[axis];p[axis+2]=Math.abs(p[axis+2]);}
+    if(p[axis]>max){p[axis]=2*max-p[axis];p[axis+2]=-Math.abs(p[axis+2]);}
+   }
+  }
+ }
+ if(!mixed&&!stopped){
+  // Overdamped piston: displacement is proportional to the net impulse.
+  fraction=Math.max(.2,Math.min(.8,fraction+.004*impulse/length));
+  stopped=fraction===.8;
+  const next=membraneX();
+  for(const p of solute)if(p[0]>next){p[0]=2*next-p[0];p[2]=-Math.abs(p[2]);}
+ }
+}
+function draw(){
+ const membrane=membraneX();
+ ctx.clearRect(0,0,640,280);
+ ctx.fillStyle='#eaf4fb';ctx.fillRect(left,top,length,bottom-top);
+ ctx.strokeStyle='#64788d';ctx.lineWidth=2;ctx.strokeRect(left,top,length,bottom-top);
+ ctx.save();ctx.beginPath();ctx.rect(left,top,length,bottom-top);ctx.clip();
+ for(const [points,r,color] of [[solvent,2.4,'#adc7db'],[solute,4.6,'#2477b5']]){
+  ctx.fillStyle=color;
+  for(const [x,y] of points){ctx.beginPath();ctx.arc(x,y,r,0,2*Math.PI);ctx.fill();}
+ }
+ ctx.restore();ctx.font='16px Segoe UI';ctx.textAlign='center';ctx.fillStyle='#182334';
+ if(mixed)ctx.fillText('Mixing after piston removal',320,31);
+ else{
+  ctx.fillText('Solution',(left+membrane)/2,31);ctx.fillText('Pure solvent',(membrane+right)/2,31);
+  ctx.strokeStyle='#364f65';ctx.lineWidth=4;ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(membrane,top);ctx.lineTo(membrane,bottom);ctx.stroke();ctx.setLineDash([]);
+ }
+ ctx.strokeStyle='#a54936';ctx.fillStyle='#a54936';ctx.lineWidth=2;
+ for(const [f,label] of [[.2,'Partenza 20%'],[.8,'Battuta 80%']]){
+  const x=left+length*f;ctx.beginPath();ctx.moveTo(x,bottom-7);ctx.lineTo(x,bottom+12);ctx.stroke();ctx.fillText(label,x,bottom+34);
+ }
+ const points=mixed?solute:solvent;
+ const n=points.filter(([x])=>x<=membrane).length;
+ $('volumeValue').value=format(fraction,3);
+ $('pressure').textContent='Theoretical Π /(NₛkᴮT/V) = '+format(1/fraction,2);
+ $('entropy').textContent='Mixing ΔS /(Nₛkᴮ) ≈ '+format(Math.log(1/fraction),3);
+ $('distribution').textContent=(mixed?'Soluto':'Solvente')+' a sinistra: '+n+' · a destra: '+(points.length-n)+(mixed?'':' · urti: '+solventHits+' solvente, '+soluteHits+' soluto');
+ $('caption').textContent=mixed?'Soluto e solvente si muovono in tutto il recipiente.':(stopped?'Pistone fermo alla battuta. ':'')+'Il soluto rimbalza. Il solvente attraversa il pistone nell’80% degli incontri. I rimbalzi delle due specie spostano il pistone in proporzione all’impulso netto.';
+}
+$('mixed').onchange=()=>{mixed=$('mixed').checked;if(!mixed)populate(solute,24,membraneX());draw();};
+$('reset').onclick=reset;
+$('play').onclick=()=>{playing=!playing;last=null;$('play').textContent=playing?'Pause':'Play';};
+function frame(now){
+ if(playing){
+  if(last!==null){
+   const dt=Math.min((now-last)/1000,.05),steps=Math.ceil(dt*240);
+   for(let i=0;i<steps;i++)advance(dt/steps);
+   draw();
+  }
+  last=now;
+ }
+ requestAnimationFrame(frame);
+}
+reset();requestAnimationFrame(frame);
+})();
+</script></body></html>

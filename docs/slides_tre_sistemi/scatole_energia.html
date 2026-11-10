@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Exchange of one quantum</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#e9edf2;color:#182334;font-family:Segoe UI,Arial,sans-serif}main{max-width:1280px;margin:3vh auto;background:white;padding:36px 48px;min-height:90vh}h1{font-size:36px;margin:0 0 12px}p{font-size:19px;line-height:1.45;margin:10px 0}.muted{color:#58667a;font-size:16px}.slide{display:none}.slide.active{display:block}canvas{width:100%;height:370px;display:block}.pair{display:grid;grid-template-columns:1fr 1fr;gap:26px}.pair canvas{height:350px}footer{margin-top:28px;border-top:1px solid #ddd;padding-top:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}button,select{font:inherit;padding:8px;border:1px solid #ccd3dd;background:white;border-radius:3px;cursor:pointer}input{flex:1;min-width:160px}.formula{font-family:Georgia,serif;font-size:23px}.readout{font-variant-numeric:tabular-nums}a{color:#2477b5}@media(max-width:750px){main{padding:22px}.pair{grid-template-columns:1fr}h1{font-size:27px}canvas,.pair canvas{height:270px}}@media print{.slide{display:block;break-after:page}footer{display:none}}
+.balance{max-width:680px;margin:18px auto 0}.balance-labels{display:flex;justify-content:space-between;font-size:17px;font-variant-numeric:tabular-nums}.balance-track{position:relative}.balance-track:after{content:'';position:absolute;left:50%;top:7px;height:20px;border-left:1px solid #8c96a5;pointer-events:none}#balance{display:block;width:100%;margin:8px 0;height:20px;accent-color:#d24c3a;pointer-events:none}footer{margin-top:18px}body{background:white}main{margin:0 auto}canvas{height:400px}.pair canvas{height:400px}.rule-toggle{display:inline-flex;align-items:center;gap:9px;cursor:pointer;white-space:nowrap}.rule-toggle input#rule{position:absolute;width:1px;height:1px;min-width:0;opacity:0;flex:none}.switch-track{display:inline-block;width:42px;height:24px;border-radius:20px;background:#d24c3a;position:relative;flex:none}.switch-track:before{content:'';position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:white;transition:transform .15s}.rule-toggle input:checked+.switch-track{background:#2477b5}.rule-toggle input:checked+.switch-track:before{transform:translateX(18px)}.rule-toggle input:focus-visible+.switch-track{outline:2px solid #182334;outline-offset:3px}.rule-toggle span:first-child{color:#d24c3a}.rule-toggle span:last-child{color:#2477b5}</style>
+<link rel="stylesheet" href="lesson-theme.css"><script src="course-navigation.js" defer></script></head><body class="course-slide course-energy"><nav class="course-bar" aria-label="Course navigation"><div class="course-steps"><a class="course-arrow" data-previous href="introduzione_capitolo_2.html" aria-label="Previous slide">‹</a><label class="course-track"><span data-slide-position>3 / 7</span><input aria-label="Slide within chapter" type="range" min="1" max="7" value="3"></label><a class="course-arrow" data-next-slide href="scatole_energia.html?view=2" aria-label="Next slide">›</a></div><a class="course-contents" href="indice.html">Course contents</a><span class="course-chapter">02 · Energy exchange</span></nav><main>
+<section class="slide active"><h1>Two systems exchanging energy</h1><p>A and B each contain 50 particles. A total of 300 energy quanta of size ε circulate between them.</p><div class="pair"><canvas id="a" aria-label="Energy of the 50 particles in A"></canvas><canvas id="b" aria-label="Energy of the 50 particles in B"></canvas></div></section>
+<section class="slide"><h1>Time average of the energy in A</h1><p>Grey shows instantaneous energy, red the average from 0 to t, and blue the reference at 150 ε.</p><canvas id="mean" aria-label="Instantaneous and time-averaged energy in A"></canvas></section>
+<section class="slide"><h1>Energy distribution per particle</h1><p>Particle energies from step 500 to t. Blue shows the exact result and the dashed red line shows the Boltzmann approximation.</p><canvas id="distribution" aria-label="Empirical and theoretical particle energy distributions"></canvas></section>
+<div class="balance"><div class="balance-labels"><span id="balance-a">A</span><span>150 ε</span><span id="balance-b">B</span></div><div class="balance-track"><input id="balance" type="range" min="0" max="300" value="150" tabindex="-1" aria-label="Instantaneous energy in A, centred on 150 epsilon" aria-readonly="true"></div></div><footer><button id="prev">‹</button><span id="page">1 / 3</span><button id="next">›</button><button id="play">Play</button><button id="reset">Resample</button><input id="seek" type="range" min="0" max="10000" step="20" value="0" aria-label="Step"><span id="time">t = 0 / 10000</span><label class="rule-toggle"><span id="rule-boltzmann">Boltzmann</span><input id="rule" type="checkbox" role="switch" aria-label="Binomiale attiva, Boltzmann disattiva"><span class="switch-track" aria-hidden="true"></span><span id="rule-binomial">Binomial</span></label></footer>
+
+</main><script src="../energy_boxes.js"></script><script>
+'use strict';
+const STEPS=10000,STRIDE=20;let ymax;let seed=20261030,data,t=0,page=0,playing=false,last=0;const $=id=>document.getElementById(id),colors=['#d24c3a','#2477b5'];
+function setup(preserve=false){const previousTime=t,wasPlaying=playing;data=EnergyBoxes.simulate(seed,$('rule').checked?'packet':'box',STEPS);ymax=12;for(const b of data.history)for(const v of b)ymax=Math.max(ymax,v);t=preserve?previousTime:0;playing=preserve?wasPlaying:false;last=0;$('play').textContent=playing?'Pause':'Play';draw();}
+function frame(id,title,xlabel,ylabel,xmax,ymax){
+ const canvas=$(id),r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);
+ canvas.width=Math.round(r.width*d);canvas.height=Math.round(r.height*d);
+ const c=canvas.getContext('2d');c.scale(d,d);
+ const w=r.width,h=r.height,left=82,right=22,top=46,bottom=62;
+ const X=x=>left+x/xmax*(w-left-right),Y=y=>h-bottom-y/ymax*(h-top-bottom);
+ c.font='14px Segoe UI';c.fillStyle='#182334';c.textAlign='center';c.textBaseline='middle';
+ c.fillText(title,(left+w-right)/2,20);
+ for(let k=0;k<=4;k++){
+  const v=ymax*k/4;c.strokeStyle=k?'#e9edf2':'#b5c0cf';c.lineWidth=1;
+  c.beginPath();c.moveTo(left,Y(v));c.lineTo(w-right,Y(v));c.stroke();
+  c.fillStyle='#64748b';c.textAlign='right';c.fillText(v.toFixed(ymax<1?2:0),left-12,Y(v));
+ }
+ c.textAlign='center';
+ for(let k=0;k<=5;k++){const value=xmax*k/5;c.fillText(value.toFixed(0),X(value),h-bottom+19);}
+ c.fillStyle='#334155';c.font='15px Segoe UI';c.fillText(xlabel,(left+w-right)/2,h-15);
+ c.save();c.translate(20,(top+h-bottom)/2);c.rotate(-Math.PI/2);c.fillText(ylabel,0,0);c.restore();
+ return {c,X,Y};
+}
+function line(f,values,color,dash=[]){f.c.strokeStyle=color;f.c.lineWidth=2;f.c.setLineDash(dash);f.c.beginPath();values.forEach((v,i)=>i?f.c.lineTo(f.X(i),f.Y(v)):f.c.moveTo(f.X(i),f.Y(v)));f.c.stroke();f.c.setLineDash([]);}
+function draw(){document.querySelectorAll('.slide').forEach((s,i)=>s.classList.toggle('active',i===page));$('page').textContent=`${page+1} / 3`;$('seek').value=t;$('time').textContent=`t = ${t} / ${STEPS}`;const rule=data.rule,ea=data.energy[t];
+ $('balance').value=ea;$('balance-a').textContent=`A: ${ea} ε`;$('balance-b').textContent=`B: ${300-ea} ε`;
+ if(page===0){for(let g=0;g<2;g++){const f=frame(g?'b':'a',`Sistema ${g?'B':'A'}`,'Particella','E / ε',50,ymax);f.c.fillStyle=colors[g];data.history[t].slice(g*50,g*50+50).forEach((v,i)=>f.c.fillRect(f.X(i+.12),f.Y(v),Math.max(1,f.X(.85)-f.X(0)),f.Y(0)-f.Y(v)));}
+ }else if(page===1){const f=frame('mean','','Passo','E / ε',STEPS,Math.max(210,...data.energy)+10);line(f,data.energy.slice(0,t+1),'#b5bbc4');line(f,data.means.slice(0,t+1),colors[0]);line(f,Array(STEPS+1).fill(150),colors[1],[7,5]);
+ }else{const counts=Array(301).fill(0);let n=0;for(let k=500;k<=t;k++)for(const v of data.history[k]){counts[v]++;n++;}const p=EnergyBoxes.theory(rule),f=frame('distribution',t<500?'Sampling from step 500':'','E / ε','Probabilità',30,.28);f.c.fillStyle='#a8bbd2';for(let k=0;k<=30;k++)f.c.fillRect(f.X(k-.4),f.Y(n?counts[k]/n:0),f.X(.8)-f.X(0),f.Y(0)-f.Y(n?counts[k]/n:0));line(f,p.slice(0,31),colors[1]);if(rule==='box')line(f,Array.from({length:31},(_,k)=>.25*.75**k),colors[0],[6,4]);}}
+function change(d){page=(page+d+3)%3;draw();}
+$('prev').onclick=()=>change(-1);$('next').onclick=()=>change(1);$('play').onclick=()=>{if(t===STEPS)t=0;playing=!playing;$('play').textContent=playing?'Pause':'Play';last=0;};$('seek').oninput=()=>{t=Math.min(STEPS,Math.round(Number($('seek').value)/STRIDE)*STRIDE);draw();};$('reset').onclick=()=>{seed++;setup();};$('rule').onchange=()=>setup(true);
+window.addEventListener('resize',draw);window.addEventListener('keydown',e=>{if(['INPUT','SELECT'].includes(e.target.tagName))return;if(e.key==='ArrowRight')change(1);if(e.key==='ArrowLeft')change(-1);if(e.code==='Space'){e.preventDefault();$('play').click();}});
+function tick(now){if(playing&&now-last>=1000/30){last=now;if(t<STEPS)t=Math.min(STEPS,t+STRIDE);if(t===STEPS){playing=false;$('play').textContent='Play';}draw();}requestAnimationFrame(tick);}setup();requestAnimationFrame(tick);
+</script></body></html>

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Thermal fluctuations of a thin membrane</title>
+<style>*{box-sizing:border-box}body{margin:0;color:#182334;background:white;font:17px/1.5 'Segoe UI',Arial,sans-serif}main{max-width:1280px;margin:auto;padding:28px 42px}h1{margin:6px 0 18px}h2{font-size:22px;margin:10px 0}.layout{display:grid;grid-template-columns:1.1fr 1fr;gap:32px}.layout>section{min-width:0}canvas{display:block;width:100%;height:auto}label{display:block;margin:12px 0}input[type=range]{width:100%;accent-color:#2477b5}button{font:inherit;padding:7px 12px;border:1px solid #ccd3dd;background:white;border-radius:4px;cursor:pointer}.controls,footer{display:flex;gap:12px;flex-wrap:wrap;align-items:center}footer{border-top:1px solid #ddd;margin-top:20px;padding-top:14px}.muted{color:#58667a;font-size:15px}math{font-size:22px;max-width:100%;overflow:auto;margin:14px 0}a{color:#2477b5}@media(max-width:800px){main{padding:20px}.layout{grid-template-columns:1fr}}</style><link rel="stylesheet" href="lesson-theme.css"><script src="course-navigation.js" defer></script></head>
+<body class="course-slide"><nav class="course-bar" aria-label="Course navigation"><div class="course-steps"><a class="course-arrow" data-previous href="tensione_superficiale.html" aria-label="Previous slide">‹</a><label class="course-track"><span data-slide-position>7 / 8</span><input aria-label="Slide within chapter" type="range" min="1" max="8" value="7" ></label><a class="course-arrow" data-next-slide href="stabilita_film.html" aria-label="Next slide">›</a></div><a class="course-contents" href="indice.html">Course contents</a><span class="course-chapter">06 · Entropic forces</span></nav><main><div class="muted">CHAPTER 6 · SLIDE 7</div><h1>Thermal fluctuations of a thin membrane</h1><div class="layout"><section>
+<h2>A surface undergoing thermal motion</h2>
+<canvas id="membrane" width="620" height="395" role="img" aria-label="Membrana quasi piatta con ondulazioni termiche in prospettiva"></canvas>
+<div class="controls"><button id="play" type="button">Pause</button><button id="clear" type="button">Reset the spectrum average</button></div>
+<label>Reduced temperature k<sub>B</sub>T = <output id="temperatureValue"></output><input id="temperature" type="range" min="0" max="2" step=".05" value="1"></label>
+<label>Tension σ = <output id="tensionValue"></output><input id="tension" type="range" min="0" max="8" step=".1" value="3"></label>
+<label>Bending rigidity κ = <output id="bendingValue"></output><input id="bending" type="range" min=".25" max="2" step=".05" value=".25"></label>
+<p id="heightStats"></p>
+<p class="muted">The animation uses reduced units and a fixed vertical scale. The membrane has periodic boundaries and zero mean height. Stochastic relaxation samples the modes. The on-screen time is used to visualize equilibrium fluctuations.</p>
+</section><section>
+<h2>How large are fluctuations at each wavelength?</h2>
+<canvas id="spectrum" width="620" height="305" role="img" aria-label="Log-scale membrane mode spectrum with a theoretical curve and sampled points"></canvas>
+<p id="spectrumStats"></p>
+<p class="muted">Blue curve: equipartition. Orange points: sample averages grouped by the magnitude of q. When visible, the dashed line marks q<sub>×</sub> = √(σ/κ).</p>
+<p>As in the bubble film, increasing the area costs energy. A small height fluctuation h adds area in proportion to |∇h|². Bending adds a curvature cost proportional to (∇²h)².</p>
+<math display="block"><mi>ℱ</mi><mo>[</mo><mi>h</mi><mo>]</mo><mo>=</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>∫</mo><mo>[</mo><mi>σ</mi><msup><mrow><mo>|</mo><mi>∇</mi><mi>h</mi><mo>|</mo></mrow><mn>2</mn></msup><mo>+</mo><mi>κ</mi><msup><mrow><mo>(</mo><msup><mi>∇</mi><mn>2</mn></msup><mi>h</mi><mo>)</mo></mrow><mn>2</mn></msup><mo>]</mo><mi>d</mi><mi>A</mi></math>
+<p>A Fourier mode of wave number q has stiffness σq² + κq⁴. Equipartition assigns the same mean energy to each quadratic degree of freedom. With the normalization used in the plot this gives</p>
+<math display="block"><mi>S</mi><mo>(</mo><mi>q</mi><mo>)</mo><mo>=</mo><mfrac><mrow><msub><mi>k</mi><mi>B</mi></msub><mi>T</mi></mrow><mrow><mi>σ</mi><msup><mi>q</mi><mn>2</mn></msup><mo>+</mo><mi>κ</mi><msup><mi>q</mi><mn>4</mn></msup></mrow></mfrac></math>
+<p>At fixed tension and rigidity, doubling T doubles fluctuation power. Tension dominates at small q, with S ∝ q⁻². Bending dominates at large q, with S ∝ q⁻⁴. Set σ to zero to isolate the latter case. <a href="https://pubs.rsc.org/en/content/articlehtml/2016/sm/c5sm01900a">Spectrum of fluctuating membranes</a></p>
+</section></div></main>
+<script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id);
+const fmt=(value,digits=2)=>value.toLocaleString('it-IT',{minimumFractionDigits:digits,maximumFractionDigits:digits});
+const side=30,stride=side+1,area=(2*Math.PI)**2,cutoff=8;
+const modes=[],shells=new Map(),height=new Float64Array(stride*stride);
+for(let nx=0;nx<=cutoff;nx++)for(let ny=-cutoff;ny<=cutoff;ny++){
+ const q2=nx*nx+ny*ny;
+ if(q2===0||q2>cutoff*cutoff||(nx===0&&ny<0))continue;
+ if(!shells.has(q2))shells.set(q2,{q:Math.sqrt(q2),count:0,total:0});
+ const shell=shells.get(q2);shell.count++;
+ const cosine=new Float32Array(height.length),sine=new Float32Array(height.length);
+ for(let y=0;y<=side;y++)for(let x=0;x<=side;x++){
+  const phase=2*Math.PI*(nx*x+ny*y)/side,index=y*stride+x;
+  cosine[index]=Math.cos(phase);sine[index]=Math.sin(phase);
+ }
+ modes.push({q2,shell,cosine,sine,a:0,b:0});
+}
+const orderedShells=[...shells.values()].sort((a,b)=>a.q-b.q);
+const tiles=[];
+for(let sum=0;sum<2*side-1;sum++)for(let y=0;y<side;y++){
+ const x=sum-y;if(x>=0&&x<side)tiles.push([x,y]);
+}
+let temperature,tension,bending,playing=true,last=null,samples=0;
+const normal=()=>Math.sqrt(-2*Math.log(1-Math.random()))*Math.cos(2*Math.PI*Math.random());
+const stiffness=q2=>tension*q2+bending*q2*q2;
+function clear(){samples=0;for(const shell of orderedShells)shell.total=0;}
+function updateModes(dt,initialize=false){
+ for(const mode of modes){
+  const k=stiffness(mode.q2),retain=initialize?0:Math.exp(-dt*(.65+.22*mode.q2));
+  const noise=Math.sqrt(2*temperature/(area*k)*(1-retain*retain));
+  mode.a=retain*mode.a+noise*normal();mode.b=retain*mode.b+noise*normal();
+ }
+}
+function record(){
+ samples++;
+ for(const mode of modes)mode.shell.total+=area*(mode.a*mode.a+mode.b*mode.b)/4;
+}
+function drawMembrane(){
+ height.fill(0);
+ let variance=0;
+ for(const {a,b,cosine,sine} of modes){
+  variance+=(a*a+b*b)/2;
+  for(let i=0;i<height.length;i++)height[i]+=a*cosine[i]+b*sine[i];
+ }
+ const c=$('membrane').getContext('2d');
+ const point=(x,y)=>[310+(x-y)*8.6,114+(x+y)*3.35-107*height[y*stride+x]];
+ c.clearRect(0,0,620,395);
+ c.fillStyle='#f2f6fa';c.fillRect(0,0,620,395);
+ c.strokeStyle='#9aaec0';c.setLineDash([5,4]);c.beginPath();c.moveTo(310,114);c.lineTo(568,214.5);c.lineTo(310,315);c.lineTo(52,214.5);c.closePath();c.stroke();c.setLineDash([]);
+ for(const [x,y] of tiles){
+  const z=(height[y*stride+x]+height[(y+1)*stride+x+1])/2;
+  const light=53+21*Math.tanh(z*2.8);
+  c.fillStyle='hsl('+(202-34*Math.tanh(z*2.8))+' 49% '+light+'%)';
+  c.strokeStyle='rgba(30,64,88,.17)';c.lineWidth=.55;
+  c.beginPath();c.moveTo(...point(x,y));c.lineTo(...point(x+1,y));c.lineTo(...point(x+1,y+1));c.lineTo(...point(x,y+1));c.closePath();c.fill();c.stroke();
+ }
+ c.fillStyle='#182334';c.font='15px Segoe UI';c.fillText('Height h · fixed vertical scale',18,26);
+ const expected=modes.reduce((sum,mode)=>sum+2*temperature/(area*stiffness(mode.q2)),0);
+ $('heightStats').textContent='Instantaneous RMS height: '+fmt(Math.sqrt(variance),3)+' · attesa: '+fmt(Math.sqrt(expected),3);
+}
+function drawSpectrum(){
+ const c=$('spectrum').getContext('2d'),left=76,right=596,top=34,bottom=253;
+ const X=q=>left+Math.log(q)/Math.log(cutoff)*(right-left);
+ c.clearRect(0,0,620,305);
+ c.font='15px Segoe UI';c.fillStyle='#182334';c.fillText('S(q) · log axes',left,21);
+ for(const q of [1,2,4,8])c.fillText(String(q),X(q)-4,bottom+22);
+ c.fillText('Wave number q',270,299);
+ const cross=Math.sqrt(tension/bending);
+ $('spectrumStats').textContent='Samples: '+samples+(tension?' · qₓ = '+fmt(cross):' · Solo flessione');
+ if(temperature===0){c.fillText('At T = 0 all modes have zero amplitude.',left,130);return;}
+ const theory=q=>temperature/stiffness(q*q);
+ const maxLog=Math.ceil(Math.log10(theory(1)*1.5)),minLog=Math.floor(Math.log10(theory(cutoff)/2));
+ const Y=s=>bottom-(Math.log10(s)-minLog)/(maxLog-minLog)*(bottom-top);
+ c.font='13px Segoe UI';
+ for(let decade=minLog;decade<=maxLog;decade++){
+  const y=Y(10**decade);c.fillStyle='#58667a';c.fillText('10^'+decade,19,y+4);
+  c.strokeStyle='#dce4ed';c.beginPath();c.moveTo(left,y);c.lineTo(right,y);c.stroke();
+ }
+ c.save();c.beginPath();c.rect(left,top,right-left,bottom-top);c.clip();
+ if(cross>1&&cross<cutoff){
+  c.strokeStyle='#8791a1';c.setLineDash([5,4]);c.beginPath();c.moveTo(X(cross),top);c.lineTo(X(cross),bottom);c.stroke();c.setLineDash([]);
+ }
+ c.strokeStyle='#2477b5';c.lineWidth=2.5;c.beginPath();
+ for(let i=0;i<=100;i++){const q=cutoff**(i/100);i?c.lineTo(X(q),Y(theory(q))):c.moveTo(X(q),Y(theory(q)));}c.stroke();
+ c.fillStyle='#c95a35';
+ if(samples)for(const shell of orderedShells){
+  const power=shell.total/(samples*shell.count);
+  if(power>0){c.beginPath();c.arc(X(shell.q),Y(power),3.2,0,2*Math.PI);c.fill();}
+ }
+ c.restore();
+}
+function parameters(){
+ temperature=Number($('temperature').value);tension=Number($('tension').value);bending=Number($('bending').value);
+ $('temperatureValue').value=fmt(temperature);$('tensionValue').value=fmt(tension);$('bendingValue').value=fmt(bending);
+ clear();updateModes(0,true);drawMembrane();drawSpectrum();
+}
+for(const id of ['temperature','tension','bending'])$(id).oninput=parameters;
+$('clear').onclick=()=>{clear();drawSpectrum();};
+$('play').onclick=()=>{playing=!playing;last=null;$('play').textContent=playing?'Pause':'Play';};
+function frame(now){
+ if(playing&&(last===null||now-last>=65)){
+  if(last!==null){updateModes(Math.min((now-last)/1000,.15));record();}
+  last=now;drawMembrane();drawSpectrum();
+ }
+ requestAnimationFrame(frame);
+}
+parameters();requestAnimationFrame(frame);
+})();
+</script></body></html>

@@ -1,0 +1,132 @@
+:root {
+  --course-paper: #f6f4ec;
+  --course-panel: #fffdf7;
+  --course-ink: #162e32;
+  --course-muted: #385052;
+  --course-accent: #12594d;
+  --course-line: #bccdc4;
+}
+html:has(.course-slide), body.course-slide {
+  background: var(--course-paper);
+  color: var(--course-ink);
+  font-family: system-ui, sans-serif;
+  margin: 0;
+}
+.course-slide:not(.course-deck) main {
+  box-sizing: border-box;
+  width: min(calc(100% - 2rem), 76rem);
+  max-width: none;
+  margin: 0 auto;
+  padding: clamp(1rem, 4vw, 3rem) clamp(.25rem, 2vw, 2rem);
+  background: transparent;
+}
+.course-slide h1, .course-slide h2 {
+  color: var(--course-ink);
+  font-family: Georgia, serif;
+  letter-spacing: -.025em;
+}
+.course-slide main h1 {
+  font-size: clamp(2rem, 4.4vw, 4.25rem);
+  line-height: 1.06;
+}
+.course-deck .deck {
+  background: var(--course-panel);
+  width: min(96vw, calc((100dvh - 5.5rem) * 16 / 9));
+  top: calc(50% + 2rem);
+}
+.course-slide main p { line-height: 1.55; }
+.course-slide a { color: #07574b; text-underline-offset: .2em; }
+.course-slide :is(a, button, input, select):focus-visible {
+  outline: 2px solid #07574b;
+  outline-offset: 3px;
+}
+.course-slide input[type=range] { accent-color: var(--course-accent); }
+.course-slide main :is(button, select) {
+  border: 1px solid var(--course-line);
+  border-radius: .4rem;
+  color: var(--course-ink);
+  background: var(--course-panel);
+}
+.course-slide main footer { flex-wrap: wrap; gap: .65rem 1rem; border-color: var(--course-line); }
+.course-bar {
+  box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: .6rem 1rem;
+  padding: .55rem clamp(.6rem, 3vw, 2rem);
+  background: var(--course-paper);
+  border-bottom: 1px solid var(--course-line);
+  box-shadow: 0 2px 8px #162e3212;
+  font: 600 .9rem/1.2 system-ui, sans-serif;
+}
+.course-steps { display: flex; gap: .45rem; align-items: center; }
+.course-track { display: flex; gap: .45rem; align-items: center; min-width: 0; margin: 0; font: inherit; }
+.course-track span { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.course-bar .course-track input { width: clamp(3rem, 11vw, 9rem); min-width: 0; margin: 0; }
+.course-arrow {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  background: var(--course-panel);
+  border: 1px solid var(--course-line);
+  border-radius: .4rem;
+  text-decoration: none;
+  font-size: 1.45rem;
+}
+.course-arrow[aria-disabled=true] { opacity: .42; pointer-events: none; }
+.course-chapter { justify-self: end; text-align: right; color: var(--course-muted); }
+.course-bar .course-contents, .course-bar .course-next {
+  display: inline-block;
+  background: var(--course-accent);
+  color: white;
+  border-radius: .4rem;
+  padding: .6rem .75rem;
+  text-decoration: none;
+  font-weight: 700;
+}
+.course-bar .course-contents:hover, .course-bar .course-next:hover { background: #0a453c; }
+.course-supplement { display: flex; justify-content: center; }
+.course-embedded .course-bar { display: none; }
+html:has(body.course-gas), html body.course-gas { height: auto; overflow: visible; }
+html body.course-gas #statmech-live-b7d2 {
+  --background: var(--course-paper);
+  --foreground: var(--course-ink);
+  height: calc(100dvh - 4rem);
+  min-height: 25rem;
+  max-height: none;
+}
+.course-gas :is([data-prev], [data-next], [data-count], [data-slide-slider], label[for=chapter-slide]) { display: none; }
+@media (max-width: 650px) {
+  .course-bar { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: .35rem .5rem; }
+  .course-steps { grid-row: 2; grid-column: 1 / -1; justify-content: center; }
+  .course-bar .course-contents { grid-column: 2; white-space: nowrap; }
+  .course-chapter { grid-column: 3; font-size: .72rem; }
+  .course-bar .course-track input { width: min(32vw, 9rem); }
+  .course-deck .deck { width: 96vw; }
+}
+@media print {
+  .course-bar { display: none; }
+  html:has(.course-slide), body.course-slide { background: white; }
+}
+
+.course-energy footer :is(#prev, #next, #page) { display: none; }
+
+.course-center {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+}
+.course-bar .course-next { white-space: nowrap; }
+.course-bar .course-next[hidden] { display: none; }
+.course-complete { color: var(--course-muted); font-size: .82rem; }
+@media (max-width: 650px) {
+  .course-center { grid-column: 1 / -1; justify-self: center; }
+  .course-bar:has(.course-center) .course-chapter { display: none; }
+}

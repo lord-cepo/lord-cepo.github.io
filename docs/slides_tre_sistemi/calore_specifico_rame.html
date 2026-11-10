@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The specific heat of copper and the Fermi gas</title>
+<style>*{box-sizing:border-box}body{margin:0;color:#182334;background:white;font:17px/1.5 'Segoe UI',Arial,sans-serif}main{max-width:1280px;margin:auto;padding:28px 42px}h1{margin:6px 0 18px}h2{font-size:21px;margin:12px 0 8px}.layout{display:grid;grid-template-columns:1.18fr 1fr;gap:32px}.layout>section{min-width:0}canvas{display:block;width:100%;height:auto}label{display:block;margin:12px 0}input{width:100%;accent-color:#2477b5}button{font:inherit;padding:7px 10px;border:1px solid #ccd3dd;background:#fff;border-radius:4px;cursor:pointer}math{font-size:21px;max-width:100%;overflow:auto;margin:13px 0}.muted{color:#58667a;font-size:15px}.legend{display:flex;gap:4px 16px;flex-wrap:wrap;font-size:15px}.legend span::before{content:'';display:inline-block;width:12px;height:4px;margin-right:6px;vertical-align:middle;background:var(--color)}.numbers{font-variant-numeric:tabular-nums}footer{border-top:1px solid #ddd;margin-top:24px;padding-top:14px;display:flex;gap:18px;flex-wrap:wrap}a{color:#2477b5}@media(max-width:800px){main{padding:20px}.layout{grid-template-columns:1fr}}</style><link rel="stylesheet" href="lesson-theme.css"><script src="course-navigation.js" defer></script></head>
+<body class="course-slide"><nav class="course-bar" aria-label="Course navigation"><div class="course-steps"><a class="course-arrow" data-previous href="occupazione_quantistica.html" aria-label="Previous slide">‹</a><label class="course-track"><span data-slide-position>3 / 6</span><input aria-label="Slide within chapter" type="range" min="1" max="6" value="3" ></label><a class="course-arrow" data-next-slide href="modi_acustici_ottici.html" aria-label="Next slide">›</a></div><a class="course-contents" href="indice.html">Course contents</a><span class="course-chapter">07 · Quantum statistics</span></nav><main><div class="muted">CHAPTER 7 · SLIDE 3</div><h1>The specific heat of copper and the Fermi gas</h1>
+<div class="layout"><section>
+<h2>Calculation and calorimetry measurements</h2>
+<canvas id="capacity" width="660" height="330" role="img" aria-label="Molar heat capacity of copper on a logarithmic scale, with calorimetry data and models"></canvas>
+<div class="legend"><span style="--color:#2477b5">Debye + Fermi</span><span style="--color:#c45d35">Debye + classical electrons</span><span style="--color:#8791a1">Fully classical</span><span style="--color:#182334">Measured Cₚ</span></div>
+<label>Temperature <output id="value">15,36</output> K<input id="temperature" type="range" min="1" max="30" step=".01" value="15.36"></label>
+<p><button id="measurement" type="button">Jump to the nearest measurement</button></p>
+<p id="numbers" class="numbers"></p>
+<h2>How occupation numbers change</h2>
+<canvas id="occupation" width="660" height="220" role="img" aria-label="Fermi–Dirac distribution near the Fermi energy, showing excited electrons and holes"></canvas>
+<p class="muted">The curve uses μ ≈ E<sub>F</sub>, valid here because T ≪ T<sub>F</sub>. Orange: excited electrons. Light blue: states that become empty below E<sub>F</sub>.</p>
+</section><section>
+<h2>What does equipartition predict?</h2>
+<p>The molar heat capacity at constant volume is the derivative of molar internal energy with respect to temperature. For a classical gas, each of the three momentum components contributes k<sub>B</sub>T/2 per electron. Assuming one conduction electron per copper atom, we obtain</p>
+<math display="block"><msub><mi>U</mi><mtext>el</mtext></msub><mo>=</mo><mfrac><mn>3</mn><mn>2</mn></mfrac><mi>R</mi><mi>T</mi><mo>,</mo><mspace width="1em"/><msub><mi>C</mi><mtext>el</mtext></msub><mo>=</mo><mfrac><mrow><mi>d</mi><msub><mi>U</mi><mtext>el</mtext></msub></mrow><mrow><mi>d</mi><mi>T</mi></mrow></mfrac><mo>=</mo><mfrac><mn>3</mn><mn>2</mn></mfrac><mi>R</mi></math>
+<p>A classical harmonic lattice adds 3R per mole of atoms because each direction of vibration has kinetic and potential energy. The fully classical model therefore gives 9R/2 ≈ 37.4 J/(mol·K).</p>
+<h2>What changes with Fermi–Dirac statistics?</h2>
+<p>When T ≪ T<sub>F</sub>, occupation changes occur mainly within a few k<sub>B</sub>T of E<sub>F</sub>. The fraction of states involved is of order T/T<sub>F</sub>. The low-temperature expansion gives</p>
+<math display="block"><msub><mi>C</mi><mtext>el</mtext></msub><mo>≈</mo><mfrac><msup><mi>π</mi><mn>2</mn></msup><mn>2</mn></mfrac><mi>R</mi><mfrac><mi>T</mi><msub><mi>T</mi><mi>F</mi></msub></mfrac><mo>,</mo><mspace width="1em"/><msub><mi>C</mi><mtext>ret</mtext></msub><mo>≈</mo><mfrac><mrow><mn>12</mn><msup><mi>π</mi><mn>4</mn></msup></mrow><mn>5</mn></mfrac><mi>R</mi><msup><mrow><mo>(</mo><mfrac><mi>T</mi><msub><mi>Θ</mi><mi>D</mi></msub></mfrac><mo>)</mo></mrow><mn>3</mn></msup></math>
+<p>To isolate the Pauli exclusion effect, both coloured curves use the same quantum Debye lattice. The blue curve adds the Fermi contribution and the orange curve adds the classical term 3R/2. We use T<sub>F</sub> ≈ 82,000 K from the free-electron model and Θ<sub>D</sub> = 345.8 K from low-temperature calorimetry. <a href="https://journals.aps.org/pr/abstract/10.1103/PhysRev.170.650">Experimental estimate of Θ<sub>D</sub></a></p>
+<h2>What does the experiment measure?</h2>
+<p>Robie and colleagues heated a pure copper sample in an adiabatic calorimeter. The energy supplied, corrected for the apparatus contribution and divided by the temperature rise, gives the molar heat capacity. The points show seven measurements of C<sub>p</sub> between 15 and 30 K. Over this range we use C<sub>p</sub> ≈ C<sub>V</sub> for the comparison. <a href="https://pubs.usgs.gov/journal/1976/vol4issue6/report.pdf">Robie et al. (1976), Table 3</a></p>
+<p class="muted">These points show that the classical model overestimates the heat capacity. Isolating the small linear electronic term requires lower-temperature measurements, such as those between 1 and 5 K. <a href="https://doi.org/10.1103/PhysRev.98.1699">Corak et al. (1955)</a></p>
+</section></div></main>
+<script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id),R=8.314462618,TF=82000,theta=345.8;
+const data=[[15.36,.1981],[17.39,.2995],[19.52,.4221],[21.70,.5995],[24.25,.8632],[26.95,1.210],[29.58,1.610]];
+const phonons=t=>12*Math.PI**4/5*R*(t/theta)**3;
+const electrons=t=>Math.PI**2/2*R*t/TF;
+const quantum=t=>phonons(t)+electrons(t);
+const hybrid=t=>phonons(t)+1.5*R;
+const classical=4.5*R;
+const fmt=(x,d=2)=>x.toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d});
+function nearest(t){return data.reduce((best,p)=>Math.abs(p[0]-t)<Math.abs(best[0]-t)?p:best);}
+function capacity(t){
+ const c=$('capacity').getContext('2d'),left=72,right=634,top=33,bottom=282;
+ const X=x=>left+(x-1)/29*(right-left),Y=y=>bottom-(Math.log10(y)+4)/6*(bottom-top);
+ c.clearRect(0,0,660,330);c.font='15px Segoe UI';c.fillStyle='#182334';
+ c.fillText('Molar C (J/mol·K) · log scale',left,21);
+ c.font='13px Segoe UI';
+ for(const value of [.0001,.001,.01,.1,1,10,100]){
+  const y=Y(value);c.fillStyle='#58667a';c.fillText(String(value).replace('.',','),10,y+4);
+  c.strokeStyle='#dce4ed';c.lineWidth=1;c.beginPath();c.moveTo(left,y);c.lineTo(right,y);c.stroke();
+ }
+ for(const value of [1,5,10,15,20,25,30])c.fillText(String(value),X(value)-5,bottom+20);
+ c.fillText('Temperature (K)',294,324);
+ c.strokeStyle='#b0bfce';c.setLineDash([4,5]);c.beginPath();c.moveTo(X(t),top);c.lineTo(X(t),bottom);c.stroke();
+ for(const [fn,color,dash] of [[()=>classical,'#8791a1',[3,4]],[hybrid,'#c45d35',[8,5]],[quantum,'#2477b5',[]]]){
+  c.strokeStyle=color;c.lineWidth=2.4;c.setLineDash(dash);c.beginPath();
+  for(let i=0;i<=120;i++){const x=1+29*i/120;i?c.lineTo(X(x),Y(fn(x))):c.moveTo(X(x),Y(fn(x)));}
+  c.stroke();
+ }
+ c.setLineDash([]);
+ for(const [x,y] of data){c.fillStyle='#182334';c.beginPath();c.arc(X(x),Y(y),4,0,2*Math.PI);c.fill();}
+ for(const [fn,color] of [[quantum,'#2477b5'],[hybrid,'#c45d35']]){
+  c.beginPath();c.arc(X(t),Y(fn(t)),5,0,2*Math.PI);c.fillStyle=color;c.fill();c.strokeStyle='#fff';c.lineWidth=1;c.stroke();
+ }
+}
+function occupation(t){
+ const c=$('occupation').getContext('2d'),left=60,right=632,top=28,bottom=172,max=12;
+ const X=e=>left+(e+max)/(2*max)*(right-left),Y=p=>bottom-p*(bottom-top);
+ const f=e=>1/(1+Math.exp(e/(.08617333262*t)));
+ c.clearRect(0,0,660,220);c.font='15px Segoe UI';c.fillStyle='#182334';
+ c.fillText('Occupation probability f(E)',left,17);
+ for(const p of [0,.5,1]){
+  c.fillText(fmt(p,1),15,Y(p)+5);c.strokeStyle='#dce4ed';c.lineWidth=1;c.beginPath();c.moveTo(left,Y(p));c.lineTo(right,Y(p));c.stroke();
+ }
+ for(const e of [-12,-6,0,6,12])c.fillText(String(e),X(e)-8,bottom+20);
+ c.fillText('E − Eꜰ (meV)',303,216);
+ for(const [a,b,base,color] of [[-max,0,1,'#acd3ed'],[0,max,0,'#f2b399']]){
+  c.beginPath();c.moveTo(X(a),Y(base));for(let i=0;i<=100;i++){const e=a+(b-a)*i/100;c.lineTo(X(e),Y(f(e)));}
+  c.lineTo(X(b),Y(base));c.closePath();c.fillStyle=color;c.fill();
+ }
+ c.strokeStyle='#8791a1';c.setLineDash([5,4]);c.beginPath();c.moveTo(left,Y(1));c.lineTo(X(0),Y(1));c.lineTo(X(0),Y(0));c.lineTo(right,Y(0));c.stroke();c.setLineDash([]);
+ c.strokeStyle='#2477b5';c.lineWidth=2.4;c.beginPath();for(let i=0;i<=180;i++){const e=-max+2*max*i/180;i?c.lineTo(X(e),Y(f(e))):c.moveTo(X(e),Y(f(e)));}c.stroke();
+}
+function update(){
+ const t=Number($('temperature').value),[x,y]=nearest(t);
+ $('value').value=fmt(t);
+ $('numbers').textContent='Debye + Fermi: '+fmt(quantum(t),3)+' · Debye + classico: '+fmt(hybrid(t),3)+' J/(mol·K). Nearest measurement: '+fmt(y,4)+' J/(mol·K) a '+fmt(x)+' K.';
+ capacity(t);occupation(t);
+}
+$('temperature').oninput=update;
+$('measurement').onclick=()=>{$('temperature').value=nearest(Number($('temperature').value))[0];update();};
+update();
+})();
+</script></body></html>

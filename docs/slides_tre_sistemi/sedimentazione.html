@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sedimentation and hydrostatic equilibrium</title>
+<style>*{box-sizing:border-box}body{margin:0;color:#182334;background:white;font:17px/1.5 'Segoe UI',Arial,sans-serif}main{max-width:1280px;margin:auto;padding:28px 42px}h1{font-size:34px;margin:6px 0 18px}h2{font-size:20px;margin:14px 0 8px}.layout{display:grid;grid-template-columns:1.15fr 1fr;gap:32px}.layout>section{min-width:0}canvas{display:block;width:100%;height:auto}label{display:block;margin:14px 0}input{width:100%;accent-color:#2477b5}button{font:inherit;padding:7px 12px;background:white;border:1px solid #ccd3dd;border-radius:4px;cursor:pointer}p{margin:10px 0}.muted{color:#58667a;font-size:15px}math{font-size:22px;max-width:100%;overflow:auto;margin:15px 0}footer{display:flex;gap:18px;border-top:1px solid #ddd;margin-top:22px;padding-top:14px}a{color:#2477b5}@media(max-width:800px){main{padding:20px}.layout{grid-template-columns:1fr}h1{font-size:28px}}</style><link rel="stylesheet" href="lesson-theme.css"><script src="course-navigation.js" defer></script></head>
+<body class="course-slide"><nav class="course-bar" aria-label="Course navigation"><div class="course-steps"><a class="course-arrow" data-previous href="pressione_osmotica.html" aria-label="Previous slide">‹</a><label class="course-track"><span data-slide-position>4 / 8</span><input aria-label="Slide within chapter" type="range" min="1" max="8" value="4" ></label><a class="course-arrow" data-next-slide href="attrazione_esclusione.html" aria-label="Next slide">›</a></div><a class="course-contents" href="indice.html">Course contents</a><span class="course-chapter">06 · Entropic forces</span></nav><main><div class="muted">CHAPTER 6 · SLIDE 4</div><h1>Sedimentation and hydrostatic equilibrium</h1>
+<div class="layout"><section>
+<h2>Particles under gravity and the pressure profile</h2>
+<canvas id="view" width="640" height="415" role="img" aria-label="Particle column under gravity and pressure versus height"></canvas>
+<label>Relative gravity mgH/(k<sub>B</sub>T) = <output id="gravityValue"></output><input id="gravity" type="range" min="0" max="8" step=".05" value="3"></label>
+<p><button id="play" type="button">Pause</button> <button id="reset" type="button">Reset to uniform density</button></p>
+<p id="stats"></p>
+<p class="muted">Orange shows pressure inferred from particle counts in horizontal bands, averaged over recent observations. Blue shows the equilibrium profile. Height z increases upwards. Random particle moves are accepted using the Metropolis rule at fixed temperature. Sweeps track sampling progress.</p>
+</section><section>
+<h2>The weight of a fluid layer</h2>
+<p>Consider a thin layer of cross-sectional area A and thickness dz. Pressure at its base pushes upwards. Pressure on its upper face and the layer’s weight act downwards. At rest the forces balance.</p>
+<math display="block"><mi>p</mi><mo>(</mo><mi>z</mi><mo>)</mo><mi>A</mi><mo>−</mo><mi>p</mi><mo>(</mo><mi>z</mi><mo>+</mo><mi>d</mi><mi>z</mi><mo>)</mo><mi>A</mi><mo>=</mo><mi>ρ</mi><mi>g</mi><mi>A</mi><mi>d</mi><mi>z</mi></math>
+<math display="block"><menclose notation="box"><mrow><mfrac><mrow><mi>d</mi><mi>p</mi></mrow><mrow><mi>d</mi><mi>z</mi></mrow></mfrac><mo>=</mo><mo>−</mo><mi>ρ</mi><mi>g</mi></mrow></menclose></math>
+<p>The greater the mass density ρ, the faster pressure falls with height. If ρ is constant, the decrease is linear.</p>
+<h2>Why this profile is exponential</h2>
+<p>The simulated column contains ideal particles of mass m. At fixed T, the ideal gas law gives <em>p</em> = ρk<sub>B</sub>T/m. Substituting this into the hydrostatic equation gives</p>
+<math display="block"><mi>p</mi><mo>(</mo><mi>z</mi><mo>)</mo><mo>=</mo><mi>p</mi><mo>(</mo><mn>0</mn><mo>)</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>z</mi><mo>/</mo><mi>ℓ</mi></mrow></msup><mo>,</mo><mspace width="1em"/><mi>ℓ</mi><mo>=</mo><mfrac><mrow><msub><mi>k</mi><mi>B</mi></msub><mi>T</mi></mrow><mrow><mi>m</mi><mi>g</mi></mrow></mfrac></math>
+<p>Counting particles by height gives the same profile. A higher position has greater potential energy mgz and a smaller Boltzmann weight. The length ℓ is the distance over which pressure falls by a factor of e.</p>
+<p>Try g = 0 for uniform pressure, then increase gravity to concentrate particles near the bottom.</p>
+</section></div>
+</main>
+<script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id),c=$('view').getContext('2d');
+const N=1800,bins=24,particles=new Float64Array(N*2),observations=[];
+const format=(x,d=2)=>x.toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d});
+let gravity=Number($('gravity').value),sweeps=0,playing=true,last=0;
+function reset(){
+ for(let i=0;i<particles.length;i++)particles[i]=Math.random();
+ observations.length=0;sweeps=0;draw();
+}
+function reflect(x){return x<0?-x:x>1?2-x:x;}
+function sweep(){
+ for(let i=0;i<particles.length;i+=2){
+  particles[i]=reflect(particles[i]+.1*(2*Math.random()-1));
+  const z=particles[i+1],next=reflect(z+.18*(2*Math.random()-1));
+  const energy=gravity*(next-z);
+  if(energy<=0||Math.random()<Math.exp(-energy))particles[i+1]=next;
+ }
+ sweeps++;
+}
+function count(){
+ const values=new Float64Array(bins);
+ for(let i=1;i<particles.length;i+=2)values[Math.min(bins-1,Math.floor(particles[i]*bins))]+=bins/N;
+ return values;
+}
+function draw(){
+ const l=28,r=218,t=43,b=359,chartLeft=305,chartRight=610;
+ const Z=z=>b-z*(b-t);
+ const normalization=gravity===0?1:gravity/(-Math.expm1(-gravity));
+ const xMax=Math.max(2,Math.ceil(normalization*1.15)),X=p=>chartLeft+p/xMax*(chartRight-chartLeft);
+ const average=new Float64Array(bins),samples=observations.length?observations:[count()];
+ for(const sample of samples)for(let k=0;k<bins;k++)average[k]+=sample[k]/samples.length;
+ c.clearRect(0,0,640,415);c.fillStyle='#eaf3fa';c.fillRect(l,t,r-l,b-t);
+ c.strokeStyle='#6b8094';c.lineWidth=1;c.strokeRect(l,t,r-l,b-t);
+ c.fillStyle='rgba(36,119,181,.67)';
+ for(let i=0;i<particles.length;i+=2)c.fillRect(l+2+particles[i]*(r-l-4),Z(particles[i+1]),1.8,1.8);
+ c.font='15px Segoe UI';c.fillStyle='#182334';
+ c.fillText('Column · gravity ↓',l,25);c.fillText('Relative pressure',chartLeft,25);
+ for(const z of [0,.25,.5,.75,1]){
+  c.strokeStyle='#dce4ed';c.beginPath();c.moveTo(chartLeft,Z(z));c.lineTo(chartRight,Z(z));c.stroke();
+  c.fillStyle='#58667a';c.fillText(format(z),chartLeft-42,Z(z)+5);
+ }
+ for(let p=0;p<=xMax;p+=xMax>5?2:1)c.fillText(String(p),X(p)-4,b+20);
+ c.fillText('p / mean pressure',chartLeft+70,b+43);c.fillText('z / H',chartLeft-48,25);
+ c.save();c.beginPath();c.rect(chartLeft,t,chartRight-chartLeft,b-t);c.clip();
+ c.fillStyle='rgba(209,110,46,.52)';
+ for(let k=0;k<bins;k++){
+  const top=Z((k+1)/bins);
+  c.fillRect(chartLeft,top,X(average[k])-chartLeft,(b-t)/bins-1);
+ }
+ c.strokeStyle='#17699e';c.lineWidth=2.5;c.beginPath();
+ for(let i=0;i<=100;i++){const z=i/100,x=X(normalization*Math.exp(-gravity*z));i?c.lineTo(x,Z(z)):c.moveTo(x,Z(z));}
+ c.stroke();c.restore();
+ $('stats').textContent='Sweep '+sweeps+' · '+N+' particelle · ℓ/H = '+(gravity?format(1/gravity):'∞');
+}
+$('gravity').oninput=()=>{
+ gravity=Number($('gravity').value);$('gravityValue').value=format(gravity);
+ observations.length=0;draw();
+};
+$('play').onclick=()=>{playing=!playing;$('play').textContent=playing?'Pause':'Play';};
+$('reset').onclick=reset;
+function frame(time){
+ if(playing&&time-last>40){
+  for(let i=0;i<3;i++)sweep();
+  observations.push(count());if(observations.length>30)observations.shift();
+  draw();last=time;
+ }
+ requestAnimationFrame(frame);
+}
+$('gravityValue').value=format(gravity);reset();requestAnimationFrame(frame);
+})();
+</script></body></html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>From acoustic waves to the Debye heat capacity</title><style>
+*{box-sizing:border-box}body{margin:0;background:white;color:#182334;font:17px/1.5 'Segoe UI',Arial,sans-serif}main{max-width:1260px;margin:auto;padding:28px 42px}h1{margin:6px 0 18px}h2{font-size:21px;margin:12px 0 8px}.layout{display:grid;grid-template-columns:1.18fr 1fr;gap:32px}.layout>section{min-width:0}canvas{display:block;width:100%;height:auto}label{display:block;margin:12px 0}input[type=range]{width:100%;accent-color:#2477b5}button,select{font:inherit;padding:7px 12px;border:1px solid #ccd3dd;background:#fff;border-radius:4px}button{cursor:pointer}.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.muted{color:#58667a;font-size:15px}.readout{font-variant-numeric:tabular-nums;color:#27577c}math{font-size:21px;max-width:100%;overflow:auto;margin:14px 0}footer{border-top:1px solid #ddd;margin-top:22px;padding-top:14px;display:flex;gap:18px;flex-wrap:wrap}a{color:#2477b5}@media(max-width:800px){main{padding:20px}.layout{grid-template-columns:1fr}}
+</style><link rel="stylesheet" href="lesson-theme.css"><script src="course-navigation.js" defer></script></head>
+<body class="course-slide"><nav class="course-bar" aria-label="Course navigation"><div class="course-steps"><a class="course-arrow" data-previous href="modi_acustici_ottici.html" aria-label="Previous slide">‹</a><label class="course-track"><span data-slide-position>5 / 6</span><input aria-label="Slide within chapter" type="range" min="1" max="6" value="5" ></label><a class="course-arrow" data-next-slide href="radiazione_corpo_nero.html" aria-label="Next slide">›</a></div><a class="course-contents" href="indice.html">Course contents</a><span class="course-chapter">07 · Quantum statistics</span></nav><main><div class="muted">CHAPTER 7 · SLIDE 5</div><h1>From acoustic waves to the Debye heat capacity</h1>
+<div class="layout"><section>
+<h2>Which frequencies contribute to heat capacity?</h2>
+<canvas id="modes" width="650" height="240" role="img" aria-label="Debye density of modes and heat-capacity contribution versus frequency"></canvas>
+<p class="muted">Grey shows the density of modes. Blue shows their contribution to heat capacity. Higher-frequency modes contribute more as temperature rises.</p>
+<label>Temperature T/Θ<sub>D</sub> = <output id="temperatureValue"></output><input id="temperature" type="range" min=".02" max="2" step=".005" value=".15"></label>
+<h2>Debye, Einstein and the classical limit</h2>
+<canvas id="capacity" width="650" height="280" role="img" aria-label="Debye and Einstein heat capacities with the classical limit"></canvas>
+<p class="readout" id="stats"></p>
+<p class="muted">Blue: Debye. Orange: Einstein, with a single frequency ω<sub>E</sub> = ω<sub>D</sub> chosen for comparison. Dashed grey: classical limit of 3R.</p>
+</section><section>
+<h2>Three acoustic branches, many frequencies</h2>
+<p>In a three-dimensional solid, acoustic modes at small wave numbers have frequency ω ≃ v<sub>s</sub>q. In 3D the number of wave vectors with magnitude below q grows with the volume of a sphere, hence as q³. The resulting density of modes per frequency interval is proportional to ω².</p>
+<p>Debye extends the linear dispersion to a cutoff frequency ω<sub>D</sub>. The cutoff is chosen so that counting all three polarizations yields the 3N modes of a solid with N atoms. The Debye temperature is Θ<sub>D</sub> = ℏω<sub>D</sub>/k<sub>B</sub>.</p>
+<h2>Each mode is a quantum oscillator</h2>
+<p>A mode has mean occupation 1/(e<sup>x</sup> − 1), where x = ℏω/(k<sub>B</sub>T). Differentiating its thermal energy with respect to T gives the mode’s heat capacity.</p>
+<math display="block"><msub><mi>C</mi><mtext>modo</mtext></msub><mo>=</mo><msub><mi>k</mi><mi>B</mi></msub><mfrac><mrow><msup><mi>x</mi><mn>2</mn></msup><msup><mi>e</mi><mi>x</mi></msup></mrow><msup><mrow><mo>(</mo><msup><mi>e</mi><mi>x</mi></msup><mo>−</mo><mn>1</mn><mo>)</mo></mrow><mn>2</mn></msup></mfrac></math>
+<p>Integrate this contribution over all frequencies, weighted by the density of modes. Per mole of atoms, the result is</p>
+<math display="block"><msub><mi>C</mi><mi>V</mi></msub><mo>=</mo><mn>9</mn><mi>R</mi><msup><mrow><mo>(</mo><mfrac><mi>T</mi><msub><mi>Θ</mi><mi>D</mi></msub></mfrac><mo>)</mo></mrow><mn>3</mn></msup><msubsup><mo>∫</mo><mn>0</mn><mrow><msub><mi>Θ</mi><mi>D</mi></msub><mo>/</mo><mi>T</mi></mrow></msubsup><mfrac><mrow><msup><mi>x</mi><mn>4</mn></msup><msup><mi>e</mi><mi>x</mi></msup></mrow><msup><mrow><mo>(</mo><msup><mi>e</mi><mi>x</mi></msup><mo>−</mo><mn>1</mn><mo>)</mo></mrow><mn>2</mn></msup></mfrac><mi>d</mi><mi>x</mi></math>
+<p><strong>At low T</strong>, long-wavelength modes remain active. The integral approaches a constant and heat capacity falls as T³, giving the phonon term used in the copper example. The Einstein model gives an exponential decrease because every mode has the same finite frequency.</p>
+<p><strong>At high T</strong>, each mode contributes about k<sub>B</sub> and both models approach 3R per mole. <a href="https://ocw.mit.edu/courses/2-57-nano-to-macro-transport-processes-spring-2012/resources/lecture-9-specific-heat-and-plancks-law/">Vibrations and heat capacity of solids</a></p>
+</section></div></main>
+<script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id);
+const format=(v,d=3)=>v.toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d});
+const blue='#2477b5',orange='#c95a35',gray='#8791a1';
+function modeCapacity(x){
+ if(x<1e-5)return 1;
+ const decay=Math.exp(-x);
+ return x*x*decay/(-Math.expm1(-x))**2;
+}
+function debye(t){
+ const n=240;
+ let integral=0;
+ for(let i=0;i<=n;i++){
+  const u=i/n;
+  integral+=(i===0||i===n?1:i%2?4:2)*3*u*u*modeCapacity(u/t);
+ }
+ return integral/(3*n);
+}
+const curve=Array.from({length:141},(_,i)=>{
+ const t=.02*100**(i/140);
+ return {t,debye:debye(t),einstein:modeCapacity(1/t)};
+});
+function plot(canvas,x,y,xTicks,yTicks,xLabel,yLabel){
+ const c=canvas.getContext('2d'),left=64,right=626,top=29,bottom=canvas.height-42;
+ const X=v=>left+x(v)*(right-left),Y=v=>bottom-y(v)*(bottom-top);
+ c.clearRect(0,0,canvas.width,canvas.height);c.font='15px Segoe UI';c.fillStyle='#182334';c.fillText(yLabel,left,20);
+ c.font='13px Segoe UI';
+ for(const v of yTicks){
+  c.fillStyle='#58667a';c.fillText(format(v,2),10,Y(v)+4);
+  c.strokeStyle='#dce4ed';c.lineWidth=1;c.beginPath();c.moveTo(left,Y(v));c.lineTo(right,Y(v));c.stroke();
+ }
+ for(const v of xTicks)c.fillText(format(v,Number.isInteger(v*10)?1:2),X(v)-10,bottom+19);
+ c.fillText(xLabel,310,canvas.height-4);
+ return {c,X,Y,top,bottom};
+}
+function drawLine({c,X,Y},points,color,dash=[]){
+ c.strokeStyle=color;c.lineWidth=2.6;c.setLineDash(dash);c.beginPath();
+ points.forEach(([x,y],i)=>i?c.lineTo(X(x),Y(y)):c.moveTo(X(x),Y(y)));
+ c.stroke();c.setLineDash([]);
+}
+function drawModes(t){
+ const graph=plot($('modes'),x=>x,y=>y/3,[0,.25,.5,.75,1],[0,1,2,3],'ω / ωD','Density of modes and heat-capacity contribution');
+ const points=Array.from({length:101},(_,i)=>i/100);
+ drawLine(graph,points.map(u=>[u,3*u*u]),gray);
+ drawLine(graph,points.map(u=>[u,3*u*u*modeCapacity(u/t)]),blue);
+}
+function drawCapacity(t,value,einstein){
+ const graph=plot($('capacity'),x=>Math.log(x/.02)/Math.log(100),y=>y/1.06,[.02,.05,.1,.2,.5,1,2],[0,.25,.5,.75,1],'T / ΘD · scala logaritmica','Cᵥ / 3R');
+ drawLine(graph,[[.02,1],[2,1]],gray,[6,5]);
+ drawLine(graph,curve.map(p=>[p.t,p.debye]),blue);
+ drawLine(graph,curve.map(p=>[p.t,p.einstein]),orange);
+ const {c,X,Y,top,bottom}=graph;
+ c.strokeStyle='#b0bfce';c.lineWidth=1;c.setLineDash([4,4]);c.beginPath();c.moveTo(X(t),top);c.lineTo(X(t),bottom);c.stroke();c.setLineDash([]);
+ for(const [y,color] of [[value,blue],[einstein,orange]]){
+  c.beginPath();c.arc(X(t),Y(y),5,0,2*Math.PI);c.fillStyle=color;c.fill();
+ }
+}
+function update(){
+ const t=Number($('temperature').value),value=debye(t),einstein=modeCapacity(1/t);
+ $('temperatureValue').value=format(t);
+ $('stats').textContent='Cᵥ / 3R · Debye '+format(value,4)+' · Einstein '+format(einstein,4);
+ drawModes(t);drawCapacity(t,value,einstein);
+}
+$('temperature').oninput=update;update();
+})();
+</script></body></html>
