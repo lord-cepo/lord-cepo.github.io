@@ -88,10 +88,16 @@ footer { border-top: 1px solid var(--line); padding-bottom: 2rem; overflow-wrap:
 }
 
 .project-video { display: block; width: min(100%, 50rem); aspect-ratio: 16 / 9; border-radius: .55rem; background: #162e32; }
-.interest-photo, .interest-placeholder { display: block; width: 100%; margin-top: .8rem; border-radius: .4rem; }
-.interest-photo { height: auto; }
-.climbing-photo { aspect-ratio: 921 / 1500; object-fit: cover; object-position: center 58%; }
-.interest-placeholder { display: grid; place-items: center; aspect-ratio: 16 / 9; padding: 1rem; border: 1px dashed var(--line); background: var(--paper); color: var(--muted); text-align: center; }
+.interests-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.interest-photo { display: block; width: 100%; aspect-ratio: 4 / 3; margin-top: .8rem; border-radius: .4rem; object-fit: contain; background: var(--paper); }
+.climbing-photo { object-fit: cover; object-position: center 60%; }
+.volleyball-clip { object-fit: cover; }
+.catan-photo { object-fit: cover; }
+.chess-photo { aspect-ratio: auto; height: auto; }
+
+@media (max-width: 630px) {
+  .interests-grid { grid-template-columns: 1fr; }
+}
 .project-grid:has(.report-card) { grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr)); }
 .report-card { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); align-items: center; gap: 1rem; }
 .report-preview { display: block; width: 100%; height: auto; max-height: 10rem; object-fit: contain; }
